@@ -33,15 +33,18 @@ export const wireReferenceData: WireReference[] = [
   { thread: '1"-8', tpi: 8, pitch: 0.125, bestWire: 0.0722, nominalM: 1.0730 }
 ];
 
+export type ThreadProfile = 'un60' | 'iso60' | 'whitworth55' | 'acme29';
+
 // Calculate M over wires
 export function calculateMOverWires(
   pitchDiameter: number,
   wireSize: number,
   pitch: number,
-  threadType: 'un60' | 'whitworth55' | 'acme29' = 'un60'
+  threadType: ThreadProfile = 'un60'
 ): number {
   switch (threadType) {
     case 'un60':
+    case 'iso60': // ISO 60° uses same formula as UN 60°
       return pitchDiameter + 3 * wireSize - 0.866025 * pitch;
     case 'whitworth55':
       return pitchDiameter + 3.1657 * wireSize - 0.9605 * pitch;
@@ -55,10 +58,11 @@ export function calculatePitchDiameterFromM(
   mMeasurement: number,
   wireSize: number,
   pitch: number,
-  threadType: 'un60' | 'whitworth55' | 'acme29' = 'un60'
+  threadType: ThreadProfile = 'un60'
 ): number {
   switch (threadType) {
     case 'un60':
+    case 'iso60':
       return mMeasurement - 3 * wireSize + 0.866025 * pitch;
     case 'whitworth55':
       return mMeasurement - 3.1657 * wireSize + 0.9605 * pitch;
@@ -70,10 +74,11 @@ export function calculatePitchDiameterFromM(
 // Get best wire size for thread type
 export function getBestWireSize(
   pitch: number,
-  threadType: 'un60' | 'whitworth55' | 'acme29' = 'un60'
+  threadType: ThreadProfile = 'un60'
 ): number {
   switch (threadType) {
     case 'un60':
+    case 'iso60':
       return 0.57735 * pitch;
     case 'whitworth55':
       return 0.56369 * pitch;

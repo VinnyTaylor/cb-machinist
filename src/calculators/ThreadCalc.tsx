@@ -5,17 +5,19 @@ import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
 import { ResetButton } from '../components/ResetButton';
-import { standardThreads, externalClasses, internalClasses, getThreadByName } from '../data/threads';
+import { standardThreads, metricThreads, metricFineThreads, externalClasses, internalClasses, getThreadByName } from '../data/threads';
 import { getBestWireSize, calculateMOverWires, calculatePitchDiameterFromM, wireReferenceData } from '../data/wireData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './ThreadCalc.css';
 
 type InputMode = 'standard' | 'custom';
-type ThreadType = 'un60' | 'whitworth55' | 'acme29';
+type ThreadType = 'un60' | 'iso60' | 'whitworth55' | 'acme29';
 type ThreadSide = 'external' | 'internal';
+type ThreadSystem = 'imperial' | 'metric' | 'metricFine';
 
 interface ThreadState {
   inputMode: InputMode;
+  threadSystem: ThreadSystem;
   standardSize: string;
   customMajorDia: string;
   customTPI: string;
@@ -31,6 +33,7 @@ interface ThreadState {
 
 const defaultState: ThreadState = {
   inputMode: 'standard',
+  threadSystem: 'imperial',
   standardSize: '1/4-20',
   customMajorDia: '0.250',
   customTPI: '20',
@@ -42,6 +45,18 @@ const defaultState: ThreadState = {
   internalClass: '2B',
   wireSize: '',
   mMeasurement: ''
+};
+
+// Get threads based on system
+const getThreadsForSystem = (system: ThreadSystem) => {
+  switch (system) {
+    case 'metric':
+      return metricThreads;
+    case 'metricFine':
+      return metricFineThreads;
+    default:
+      return standardThreads;
+  }
 };
 
 export const ThreadCalc: React.FC = () => {
@@ -76,8 +91,8 @@ export const ThreadCalc: React.FC = () => {
   const basicResults = useMemo(() => {
     const { majorDia, tpi, pitch } = threadParams;
 
-    // Thread depth for 60° threads
-    const threadDepthFactor = state.threadType === 'un60' ? 0.6495 :
+    // Thread depth factors by type
+    const threadDepthFactor = (state.threadType === 'un60' || state.threadType === 'iso60') ? 0.6495 :
       state.threadType === 'whitworth55' ? 0.6403 : 0.5;
     const threadDepth = threadDepthFactor * pitch;
     const minorDia = majorDia - 2 * threadDepth;
@@ -103,7 +118,7 @@ export const ThreadCalc: React.FC = () => {
   // Class tolerance calculations
   const classResults = useMemo(() => {
     const { majorDia, pitch } = threadParams;
-    const threadDepth = (state.threadType === 'un60' ? 0.6495 : 0.6403) * pitch;
+    const threadDepth = ((state.threadType === 'un60' || state.threadType === 'iso60') ? 0.6495 : 0.6403) * pitch;
     const nominalPitchDia = majorDia - threadDepth;
     const engagementLength = 1.5 * majorDia; // Default engagement
 
@@ -246,6 +261,28 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
           <ResetButton onClick={handleReset} />
         </div>
         <div className="form-group">
+          <label>Thread System</label>
+          <PillToggle
+            options={[
+              { value: 'imperial', label: 'Imperial' },
+              { value: 'metric', label: 'Metric' },
+              { value: 'metricFine', label: 'Metric Fine' }
+            ]}
+            value={state.threadSystem}
+            onChange={(v) => {
+              const threads = getThreadsForSystem(v);
+              setState({
+                ...state,
+                threadSystem: v,
+                standardSize: threads[0]?.name || state.standardSize,
+                threadType: v === 'imperial' ? 'un60' : 'iso60'
+              });
+            }}
+            size="small"
+          />
+        </div>
+
+        <div className="form-group">
           <label>Input Mode</label>
           <PillToggle
             options={[
@@ -265,9 +302,9 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
               value={state.standardSize}
               onChange={(e) => setState({ ...state, standardSize: e.target.value })}
             >
-              {standardThreads.map((t) => (
+              {getThreadsForSystem(state.threadSystem).map((t) => (
                 <option key={t.name} value={t.name}>
-                  {t.name} ({t.tpi} TPI)
+                  {t.name} {t.isMetric ? `(${(t.pitch * 25.4).toFixed(2)}mm pitch)` : `(${t.tpi} TPI)`}
                 </option>
               ))}
             </select>
@@ -295,12 +332,15 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
         )}
 
         <div className="form-group">
-          <label>Thread Type</label>
+          <label>Thread Profile</label>
           <PillToggle
-            options={[
+            options={state.threadSystem === 'imperial' ? [
               { value: 'un60', label: 'UN 60°' },
               { value: 'whitworth55', label: 'Whitworth 55°' },
               { value: 'acme29', label: 'ACME 29°' }
+            ] : [
+              { value: 'iso60', label: 'ISO 60°' },
+              { value: 'whitworth55', label: 'Whitworth 55°' }
             ]}
             value={state.threadType}
             onChange={(v) => setState({ ...state, threadType: v })}

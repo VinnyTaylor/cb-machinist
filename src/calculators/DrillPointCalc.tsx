@@ -30,13 +30,28 @@ const commonAngles = [
 export const DrillPointCalc: React.FC = () => {
   const [state, setState] = useLocalStorage<DrillPointState>('drill-point-calc', defaultState);
 
-  const results = useMemo(() => {
-    const diameter = parseFloat(state.diameter) || 0;
-    const pointAngle = parseFloat(state.pointAngle) || 0;
+  // Validation and results
+  const { results, error } = useMemo(() => {
+    const diameter = parseFloat(state.diameter);
+    const pointAngle = parseFloat(state.pointAngle);
     const desiredDepth = parseFloat(state.desiredDepth) || 0;
 
-    if (diameter <= 0 || pointAngle <= 0 || pointAngle >= 180) {
-      return null;
+    // Validation
+    if (state.diameter && (isNaN(diameter) || diameter <= 0)) {
+      return { results: null, error: 'Drill diameter must be greater than 0' };
+    }
+    if (state.pointAngle && isNaN(pointAngle)) {
+      return { results: null, error: 'Point angle must be a number' };
+    }
+    if (pointAngle <= 0 || pointAngle >= 180) {
+      return { results: null, error: 'Point angle must be between 0° and 180°' };
+    }
+    if (state.desiredDepth && (isNaN(desiredDepth) || desiredDepth < 0)) {
+      return { results: null, error: 'Desired depth cannot be negative' };
+    }
+
+    if (!diameter || diameter <= 0) {
+      return { results: null, error: null };
     }
 
     // Point length = (diameter / 2) / tan(pointAngle / 2)
@@ -51,10 +66,13 @@ export const DrillPointCalc: React.FC = () => {
     const pointVolume = (1 / 3) * Math.PI * radius * radius * pointLength;
 
     return {
-      pointLength: pointLength.toFixed(4),
-      totalDepth: totalDepth.toFixed(4),
-      pointVolume: pointVolume.toFixed(6),
-      halfAngle: (pointAngle / 2).toFixed(2)
+      results: {
+        pointLength: pointLength.toFixed(4),
+        totalDepth: totalDepth.toFixed(4),
+        pointVolume: pointVolume.toFixed(6),
+        halfAngle: (pointAngle / 2).toFixed(2)
+      },
+      error: null
     };
   }, [state]);
 
@@ -110,12 +128,18 @@ export const DrillPointCalc: React.FC = () => {
           </div>
         </div>
 
-        <NoteBox variant="info">
-          Enter desired flat-bottom depth to calculate total drill depth needed
-        </NoteBox>
+        {error ? (
+          <NoteBox variant="warning">
+            {error}
+          </NoteBox>
+        ) : (
+          <NoteBox variant="info">
+            Enter desired flat-bottom depth to calculate total drill depth needed
+          </NoteBox>
+        )}
       </Card>
 
-      {results && (
+      {results && !error && (
         <Card title="Results" icon="📊">
           <div className="results-grid">
             <ResultItem
