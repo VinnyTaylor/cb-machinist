@@ -55,6 +55,8 @@ export interface ToolpathSegment {
   start: Point3D;
   end: Point3D;
   feedRate: number;
+  // Source line number in G-code (0-indexed)
+  sourceLine: number;
   // For arcs
   center?: Point3D;
   radius?: number;

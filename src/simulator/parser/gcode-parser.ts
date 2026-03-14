@@ -303,7 +303,8 @@ export function generateToolpath(commands: GCodeCommand[]): Toolpath {
           start: { ...state.position },
           end: target,
           feedRate: motion === 'rapid' ? 9999 : state.feedRate,
-          plane: state.plane
+          plane: state.plane,
+          sourceLine: cmd.lineNumber
         };
 
         // Handle arcs

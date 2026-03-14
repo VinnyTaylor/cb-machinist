@@ -44,11 +44,16 @@ export const GCodeSimulator: React.FC = () => {
   const [speed, setSpeed] = useState(400);
   const [saveName, setSaveName] = useState('');
   const [showSaveInput, setShowSaveInput] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
+  const codeDisplayRef = useRef<HTMLDivElement>(null);
 
   const intervalRef = useRef<number>(0);
 
   // Favorites
   const { favorites, addFavorite, removeFavorite } = useFavorites<SavedProgram>('gcode-programs');
+
+  // Split gcode into lines for display
+  const gcodeLines = useMemo(() => gcode.split('\n'), [gcode]);
 
   // Parse G-code into toolpath
   const toolpath: Toolpath | null = useMemo(() => {
@@ -69,6 +74,31 @@ export const GCodeSimulator: React.FC = () => {
     }
     return toolpath.segments[currentSegment].end;
   }, [toolpath, currentSegment]);
+
+  // Get current active line number from toolpath segment
+  const activeLine = useMemo(() => {
+    if (!toolpath || currentSegment < 0 || currentSegment >= toolpath.segments.length) {
+      return -1;
+    }
+    return toolpath.segments[currentSegment].sourceLine;
+  }, [toolpath, currentSegment]);
+
+  // Auto-scroll to active line
+  useEffect(() => {
+    if (activeLine >= 0 && codeDisplayRef.current && !isEditing) {
+      const lineEl = codeDisplayRef.current.querySelector(`[data-line="${activeLine}"]`);
+      if (lineEl) {
+        lineEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [activeLine, isEditing]);
+
+  // Switch to run mode when cycle starts
+  useEffect(() => {
+    if (isRunning) {
+      setIsEditing(false);
+    }
+  }, [isRunning]);
 
   // Draw
   useEffect(() => {
@@ -477,12 +507,31 @@ export const GCodeSimulator: React.FC = () => {
                 ))}
               </select>
             </div>
+            {/* Edit/Run toggle */}
+            {!isEditing && (
+              <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit</button>
+            )}
           </div>
-          <textarea
-            value={gcode}
-            onChange={e => { setGcode(e.target.value); handleReset(); }}
-            spellCheck={false}
-          />
+          {isEditing ? (
+            <textarea
+              value={gcode}
+              onChange={e => { setGcode(e.target.value); handleReset(); }}
+              spellCheck={false}
+            />
+          ) : (
+            <div className="sim-code-display" ref={codeDisplayRef}>
+              {gcodeLines.map((line, i) => (
+                <div
+                  key={i}
+                  data-line={i}
+                  className={`code-line ${i === activeLine ? 'active' : ''}`}
+                >
+                  <span className="line-number">{i + 1}</span>
+                  <span className="line-text">{line || ' '}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {/* Delete saved programs */}
           {favorites.length > 0 && (
             <div className="sim-saved-list">

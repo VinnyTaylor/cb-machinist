@@ -345,3 +345,70 @@
 .saved-tag button:hover {
   color: #f85149;
 }
+
+/* Edit button */
+.btn-edit {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #30363d;
+  border: 1px solid #484f58;
+  border-radius: 4px;
+  color: #c9d1d9;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  background: #484f58;
+}
+
+/* Code display (read-only with line numbers) */
+.sim-code-display {
+  flex: 1;
+  overflow-y: auto;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 0 0 6px 6px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sim-code:has(.sim-saved-list) .sim-code-display {
+  border-radius: 0;
+}
+
+.code-line {
+  display: flex;
+  padding: 0 10px;
+  transition: background 0.15s;
+}
+
+.code-line.active {
+  background: rgba(255, 204, 0, 0.15);
+}
+
+.code-line.active .line-number {
+  color: #ffcc00;
+  font-weight: 700;
+}
+
+.code-line.active .line-text {
+  color: #ffcc00;
+  font-weight: 600;
+}
+
+.line-number {
+  width: 32px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 12px;
+  color: #484f58;
+  user-select: none;
+}
+
+.line-text {
+  flex: 1;
+  color: #c9d1d9;
+  white-space: pre;
+}
