@@ -121,6 +121,26 @@ export const materials: Material[] = [
     notes: 'Nickel superalloy. Extreme heat resistance. Ceramic/CBN inserts for finishing. Very slow.'
   },
   {
+    id: 'monel-400',
+    name: 'Monel 400',
+    difficulty: 'Hard',
+    roughSFM: 90,
+    finishSFM: 120,
+    hssSFM: 25,
+    chipLoad: 0.0015,
+    notes: 'Nickel-copper alloy. Work hardens like stainless. Gummy chips - use sharp tools, positive rake. Flood coolant essential.'
+  },
+  {
+    id: 'monel-k500',
+    name: 'Monel K-500',
+    difficulty: 'Hard',
+    roughSFM: 70,
+    finishSFM: 95,
+    hssSFM: 18,
+    chipLoad: 0.001,
+    notes: 'Age-hardened Monel. Harder than 400, very abrasive. Use ceramic or CBN for finishing. Rigid setup critical. Reduce speed 20% from Monel 400.'
+  },
+  {
     id: 'cast-iron',
     name: 'Cast Iron (Gray)',
     difficulty: 'Easy',
