@@ -4,6 +4,7 @@ import { ResultItem } from '../components/ResultItem';
 import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
+import { ResetButton } from '../components/ResetButton';
 import { materials, getMaterialById } from '../data/materials';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './SpeedsFeedsCalc.css';
@@ -29,26 +30,37 @@ interface LatheState {
   maxRPM: string;
 }
 
+const defaultMillState: MillState = {
+  materialId: 'aluminum-6061',
+  operation: 'roughing',
+  sfm: '800',
+  diameter: '0.5',
+  flutes: '4',
+  chipLoad: '0.004'
+};
+
+const defaultLatheState: LatheState = {
+  materialId: 'aluminum-6061',
+  operation: 'roughing',
+  partDiameter: '2.0',
+  sfm: '800',
+  feedIPR: '0.008',
+  maxRPM: '3000'
+};
+
 export const SpeedsFeedsCalc: React.FC = () => {
   const [mode, setMode] = useState<Mode>('mill');
 
-  const [millState, setMillState] = useLocalStorage<MillState>('speeds-mill', {
-    materialId: 'aluminum-6061',
-    operation: 'roughing',
-    sfm: '800',
-    diameter: '0.5',
-    flutes: '4',
-    chipLoad: '0.004'
-  });
+  const [millState, setMillState] = useLocalStorage<MillState>('speeds-mill', defaultMillState);
+  const [latheState, setLatheState] = useLocalStorage<LatheState>('speeds-lathe', defaultLatheState);
 
-  const [latheState, setLatheState] = useLocalStorage<LatheState>('speeds-lathe', {
-    materialId: 'aluminum-6061',
-    operation: 'roughing',
-    partDiameter: '2.0',
-    sfm: '800',
-    feedIPR: '0.008',
-    maxRPM: '3000'
-  });
+  const handleResetMill = () => {
+    setMillState(defaultMillState);
+  };
+
+  const handleResetLathe = () => {
+    setLatheState(defaultLatheState);
+  };
 
   // Update SFM and chip load when material or operation changes
   const handleMaterialChange = (materialId: string) => {
@@ -155,6 +167,9 @@ export const SpeedsFeedsCalc: React.FC = () => {
         <>
           {/* Mill Calculator */}
           <Card title="Mill Speeds & Feeds" icon="⚙️">
+            <div className="card-header-row">
+              <ResetButton onClick={handleResetMill} />
+            </div>
             <div className="form-group">
               <label>Material</label>
               <select
@@ -261,6 +276,9 @@ export const SpeedsFeedsCalc: React.FC = () => {
         <>
           {/* Lathe Calculator */}
           <Card title="Lathe / CSS Mode" icon="🔧">
+            <div className="card-header-row">
+              <ResetButton onClick={handleResetLathe} />
+            </div>
             <div className="form-group">
               <label>Material</label>
               <select

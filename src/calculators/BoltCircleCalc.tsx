@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Card } from '../components/Card';
+import { ResetButton } from '../components/ResetButton';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './BoltCircleCalc.css';
 
@@ -18,16 +19,21 @@ interface HolePosition {
   y: number;
 }
 
-export const BoltCircleCalc: React.FC = () => {
-  const [state, setState] = useLocalStorage<BoltCircleState>('bolt-circle', {
-    bcd: '4.0',
-    numHoles: '6',
-    startAngle: '0',
-    centerX: '0',
-    centerY: '0'
-  });
+const defaultState: BoltCircleState = {
+  bcd: '4.0',
+  numHoles: '6',
+  startAngle: '0',
+  centerX: '0',
+  centerY: '0'
+};
 
+export const BoltCircleCalc: React.FC = () => {
+  const [state, setState] = useLocalStorage<BoltCircleState>('bolt-circle', defaultState);
   const [copied, setCopied] = useState(false);
+
+  const handleReset = () => {
+    setState(defaultState);
+  };
 
   const holes = useMemo((): HolePosition[] => {
     const bcd = parseFloat(state.bcd) || 0;
@@ -80,6 +86,9 @@ export const BoltCircleCalc: React.FC = () => {
   return (
     <div className="bolt-calc">
       <Card title="Bolt Circle Calculator" icon="🔲">
+        <div className="card-header-row">
+          <ResetButton onClick={handleReset} />
+        </div>
         <div className="grid-2">
           <div className="form-group">
             <label>BCD Diameter</label>

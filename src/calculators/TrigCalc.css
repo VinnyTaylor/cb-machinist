@@ -4,6 +4,12 @@
   gap: 1rem;
 }
 
+.trig-calc .card-header-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
 .triangle-diagram {
   display: flex;
   justify-content: center;

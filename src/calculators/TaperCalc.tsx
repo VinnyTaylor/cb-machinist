@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card } from '../components/Card';
 import { ResultItem } from '../components/ResultItem';
+import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './TaperCalc.css';
@@ -12,6 +13,14 @@ interface TaperState {
   tpf: string; // Taper per foot
   halfAngle: string;
 }
+
+const defaultState: TaperState = {
+  d1: '1.0',
+  d2: '0.75',
+  length: '3.0',
+  tpf: '',
+  halfAngle: ''
+};
 
 // Common taper references
 const taperReferences = [
@@ -26,13 +35,11 @@ const taperReferences = [
 ];
 
 export const TaperCalc: React.FC = () => {
-  const [state, setState] = useLocalStorage<TaperState>('taper-calc', {
-    d1: '1.0',
-    d2: '0.75',
-    length: '3.0',
-    tpf: '',
-    halfAngle: ''
-  });
+  const [state, setState] = useLocalStorage<TaperState>('taper-calc', defaultState);
+
+  const handleReset = () => {
+    setState(defaultState);
+  };
 
   const results = useMemo(() => {
     const d1 = parseFloat(state.d1) || 0;
@@ -107,6 +114,9 @@ export const TaperCalc: React.FC = () => {
   return (
     <div className="taper-calc">
       <Card title="Taper Calculator" icon="📏">
+        <div className="card-header-row">
+          <ResetButton onClick={handleReset} />
+        </div>
         <div className="grid-2">
           <div className="form-group">
             <label>D1 (Large Dia)</label>

@@ -4,6 +4,7 @@ import { ResultItem } from '../components/ResultItem';
 import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
+import { ResetButton } from '../components/ResetButton';
 import { standardThreads, externalClasses, internalClasses, getThreadByName } from '../data/threads';
 import { getBestWireSize, calculateMOverWires, calculatePitchDiameterFromM, wireReferenceData } from '../data/wireData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -28,23 +29,28 @@ interface ThreadState {
   mMeasurement: string;
 }
 
-export const ThreadCalc: React.FC = () => {
-  const [state, setState] = useLocalStorage<ThreadState>('thread-calc', {
-    inputMode: 'standard',
-    standardSize: '1/4-20',
-    customMajorDia: '0.250',
-    customTPI: '20',
-    threadType: 'un60',
-    threadingRPM: '400',
-    threadLength: '0.5',
-    threadSide: 'external',
-    externalClass: '2A',
-    internalClass: '2B',
-    wireSize: '',
-    mMeasurement: ''
-  });
+const defaultState: ThreadState = {
+  inputMode: 'standard',
+  standardSize: '1/4-20',
+  customMajorDia: '0.250',
+  customTPI: '20',
+  threadType: 'un60',
+  threadingRPM: '400',
+  threadLength: '0.5',
+  threadSide: 'external',
+  externalClass: '2A',
+  internalClass: '2B',
+  wireSize: '',
+  mMeasurement: ''
+};
 
+export const ThreadCalc: React.FC = () => {
+  const [state, setState] = useLocalStorage<ThreadState>('thread-calc', defaultState);
   const [showWireTable, setShowWireTable] = useState(false);
+
+  const handleReset = () => {
+    setState(defaultState);
+  };
 
   // Get thread parameters based on input mode
   const threadParams = useMemo(() => {
@@ -236,6 +242,9 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
     <div className="thread-calc">
       {/* Input Selection */}
       <Card title="Thread Calculator" icon="🔩">
+        <div className="card-header-row">
+          <ResetButton onClick={handleReset} />
+        </div>
         <div className="form-group">
           <label>Input Mode</label>
           <PillToggle

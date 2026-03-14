@@ -4,6 +4,12 @@
   gap: 1rem;
 }
 
+.speeds-calc .card-header-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
 .results-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

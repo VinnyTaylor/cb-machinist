@@ -6,9 +6,10 @@ import { TrigCalc } from '../calculators/TrigCalc';
 import { BoltCircleCalc } from '../calculators/BoltCircleCalc';
 import { TaperCalc } from '../calculators/TaperCalc';
 import { FractionCalc } from '../calculators/FractionCalc';
+import { DrillPointCalc } from '../calculators/DrillPointCalc';
 import './CalculatorsScreen.css';
 
-type CalcTab = 'speeds' | 'thread' | 'trig' | 'bolt' | 'taper' | 'fraction';
+type CalcTab = 'speeds' | 'thread' | 'trig' | 'bolt' | 'taper' | 'fraction' | 'drill';
 
 const tabs: { id: CalcTab; label: string; icon: string }[] = [
   { id: 'speeds', label: 'Speeds & Feeds', icon: '⚙️' },
@@ -16,6 +17,7 @@ const tabs: { id: CalcTab; label: string; icon: string }[] = [
   { id: 'trig', label: 'Trig', icon: '📐' },
   { id: 'bolt', label: 'Bolt Circle', icon: '🔲' },
   { id: 'taper', label: 'Taper', icon: '📏' },
+  { id: 'drill', label: 'Drill Point', icon: '🔧' },
   { id: 'fraction', label: 'Decimal', icon: '🔢' }
 ];
 
@@ -43,6 +45,8 @@ export const CalculatorsScreen: React.FC = () => {
         return <BoltCircleCalc />;
       case 'taper':
         return <TaperCalc />;
+      case 'drill':
+        return <DrillPointCalc />;
       case 'fraction':
         return <FractionCalc />;
       default:

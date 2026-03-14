@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Card } from '../components/Card';
 import { ResultItem } from '../components/ResultItem';
+import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './TrigCalc.css';
@@ -14,17 +15,23 @@ interface TrigState {
   lookupAngle: string;
 }
 
-export const TrigCalc: React.FC = () => {
-  const [state, setState] = useLocalStorage<TrigState>('trig-calc', {
-    sideA: '',
-    sideB: '',
-    sideC: '',
-    angleTheta: '',
-    anglePhi: '',
-    lookupAngle: '45'
-  });
+const defaultState: TrigState = {
+  sideA: '',
+  sideB: '',
+  sideC: '',
+  angleTheta: '',
+  anglePhi: '',
+  lookupAngle: '45'
+};
 
+export const TrigCalc: React.FC = () => {
+  const [state, setState] = useLocalStorage<TrigState>('trig-calc', defaultState);
   const [error, setError] = useState<string | null>(null);
+
+  const handleReset = () => {
+    setState(defaultState);
+    setError(null);
+  };
 
   // Handle input changes
   const handleInputChange = (field: keyof TrigState, value: string) => {
@@ -160,6 +167,9 @@ export const TrigCalc: React.FC = () => {
   return (
     <div className="trig-calc">
       <Card title="Right Triangle Solver" icon="📐">
+        <div className="card-header-row">
+          <ResetButton onClick={handleReset} />
+        </div>
         {/* SVG Triangle Diagram */}
         <div className="triangle-diagram">
           <svg viewBox="0 0 200 150" className="triangle-svg">

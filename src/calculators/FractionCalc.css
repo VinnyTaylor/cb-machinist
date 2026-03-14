@@ -4,6 +4,12 @@
   gap: 1rem;
 }
 
+.fraction-calc .card-header-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
 .fraction-inputs {
   display: flex;
   gap: 1rem;

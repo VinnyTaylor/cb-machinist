@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card } from '../components/Card';
 import { ResultItem } from '../components/ResultItem';
 import { PillToggle } from '../components/PillToggle';
+import { ResetButton } from '../components/ResetButton';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './FractionCalc.css';
 
@@ -14,6 +15,14 @@ interface FractionState {
   numerator: string;
   denominator: string;
 }
+
+const defaultState: FractionState = {
+  mode: 'toFraction',
+  decimal: '0.375',
+  wholeNumber: '0',
+  numerator: '3',
+  denominator: '8'
+};
 
 // Generate fractions table (64ths)
 const fractionsTable = Array.from({ length: 64 }, (_, i) => {
@@ -34,15 +43,12 @@ const fractionsTable = Array.from({ length: 64 }, (_, i) => {
 });
 
 export const FractionCalc: React.FC = () => {
-  const [state, setState] = useLocalStorage<FractionState>('fraction-calc', {
-    mode: 'toFraction',
-    decimal: '0.375',
-    wholeNumber: '0',
-    numerator: '3',
-    denominator: '8'
-  });
-
+  const [state, setState] = useLocalStorage<FractionState>('fraction-calc', defaultState);
   const [showTable, setShowTable] = useState(false);
+
+  const handleReset = () => {
+    setState(defaultState);
+  };
 
   // Decimal to fraction conversion
   const fractionResult = useMemo(() => {
@@ -109,6 +115,9 @@ export const FractionCalc: React.FC = () => {
   return (
     <div className="fraction-calc">
       <Card title="Decimal ↔ Fraction" icon="🔢">
+        <div className="card-header-row">
+          <ResetButton onClick={handleReset} />
+        </div>
         <div className="form-group">
           <label>Convert</label>
           <PillToggle
