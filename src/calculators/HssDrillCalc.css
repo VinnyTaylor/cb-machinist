@@ -1,0 +1,85 @@
+.hss-drill-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 400px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sfm-reference {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+.sfm-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.sfm-value {
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.ipr-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0.75rem;
+}
+
+.ipr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ipr-table th,
+.ipr-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.ipr-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ipr-table td {
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.ipr-table td.mono {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.ipr-table tbody tr:hover {
+  background: var(--surface);
+}

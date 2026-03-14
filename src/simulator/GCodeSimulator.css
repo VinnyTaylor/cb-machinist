@@ -1,0 +1,238 @@
+/* G-Code Simulator */
+
+.sim-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 65px);
+  background: #0d1117;
+  overflow: hidden;
+}
+
+/* Main canvas area - takes most of screen */
+.sim-main {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.sim-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* DRO - top left overlay */
+.sim-dro {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.dro-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dro-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #666;
+  width: 16px;
+}
+
+.dro-value {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 18px;
+  font-weight: 600;
+  color: #3fb950;
+  letter-spacing: 0.5px;
+}
+
+/* Status bar - top right */
+.sim-status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Bottom panel */
+.sim-bottom {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  background: #161b22;
+  border-top: 1px solid #30363d;
+}
+
+@media (max-width: 700px) {
+  .sim-bottom {
+    flex-direction: column;
+  }
+}
+
+/* Controls section */
+.sim-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 280px;
+}
+
+.sim-mode {
+  flex-shrink: 0;
+}
+
+.sim-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-ctrl {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px 8px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-ctrl:hover:not(:disabled) {
+  background: #30363d;
+  border-color: #484f58;
+}
+
+.btn-ctrl:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-ctrl:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ctrl.btn-green {
+  background: #238636;
+  border-color: #2ea043;
+  color: #fff;
+}
+
+.btn-ctrl.btn-green:hover:not(:disabled) {
+  background: #2ea043;
+}
+
+.btn-ctrl.btn-red {
+  background: #b62324;
+  border-color: #da3633;
+  color: #fff;
+}
+
+.btn-ctrl.btn-red:hover:not(:disabled) {
+  background: #da3633;
+}
+
+/* Speed slider */
+.sim-speed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.sim-speed input[type="range"] {
+  flex: 1;
+  height: 6px;
+  background: #30363d;
+  border-radius: 3px;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.sim-speed input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #58a6ff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Code editor section */
+.sim-code {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-height: 150px;
+}
+
+.sim-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sim-code-header select {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  cursor: pointer;
+}
+
+.sim-code textarea {
+  flex: 1;
+  padding: 10px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 0 0 6px 6px;
+  color: #c9d1d9;
+  resize: none;
+}
+
+.sim-code textarea:focus {
+  outline: none;
+  border-color: #58a6ff;
+}

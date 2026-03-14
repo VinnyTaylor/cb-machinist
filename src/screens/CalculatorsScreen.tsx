@@ -7,9 +7,10 @@ import { BoltCircleCalc } from '../calculators/BoltCircleCalc';
 import { TaperCalc } from '../calculators/TaperCalc';
 import { FractionCalc } from '../calculators/FractionCalc';
 import { DrillPointCalc } from '../calculators/DrillPointCalc';
+import { HssDrillCalc } from '../calculators/HssDrillCalc';
 import './CalculatorsScreen.css';
 
-type CalcTab = 'speeds' | 'thread' | 'trig' | 'bolt' | 'taper' | 'fraction' | 'drill';
+type CalcTab = 'speeds' | 'thread' | 'trig' | 'bolt' | 'taper' | 'fraction' | 'drill' | 'hss';
 
 const tabs: { id: CalcTab; label: string; icon: string }[] = [
   { id: 'speeds', label: 'Speeds & Feeds', icon: '⚙️' },
@@ -18,6 +19,7 @@ const tabs: { id: CalcTab; label: string; icon: string }[] = [
   { id: 'bolt', label: 'Bolt Circle', icon: '🔲' },
   { id: 'taper', label: 'Taper', icon: '📏' },
   { id: 'drill', label: 'Drill Point', icon: '🔧' },
+  { id: 'hss', label: 'HSS Drill', icon: '🔩' },
   { id: 'fraction', label: 'Decimal', icon: '🔢' }
 ];
 
@@ -47,6 +49,8 @@ export const CalculatorsScreen: React.FC = () => {
         return <TaperCalc />;
       case 'drill':
         return <DrillPointCalc />;
+      case 'hss':
+        return <HssDrillCalc />;
       case 'fraction':
         return <FractionCalc />;
       default:
