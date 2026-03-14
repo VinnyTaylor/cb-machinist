@@ -1,0 +1,56 @@
+.manual-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.content-heading {
+  font-family: var(--font-heading);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0.5rem 0 0 0;
+}
+
+.content-heading:first-child {
+  margin-top: 0;
+}
+
+.content-paragraph {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--muted2);
+  margin: 0;
+}
+
+.content-formula {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.content-formula code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent2);
+}
+
+.content-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.content-list li {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted2);
+}
+
+.content-list li::marker {
+  color: var(--accent);
+}

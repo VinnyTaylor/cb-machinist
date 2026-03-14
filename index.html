@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#F97316" />
+    <meta name="background-color" content="#0B0D11" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="C&B Machinist" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="C&B Machinist" />
+    <meta name="description" content="CNC machining reference and calculator app for C&B Technology" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.svg" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <title>C&B Machinist</title>
+
+    <!-- Inline critical CSS to prevent FOUC -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0B0D11;
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+      #root {
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

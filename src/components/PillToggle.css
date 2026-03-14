@@ -1,0 +1,73 @@
+.pill-toggle {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+
+.pill-full {
+  display: flex;
+  width: 100%;
+}
+
+.pill-full .pill-option {
+  flex: 1;
+}
+
+.pill-option {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.pill-small .pill-option {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.pill-option:hover:not(.active) {
+  color: var(--muted2);
+}
+
+.pill-option.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Scrollable variant for many pills */
+.pill-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.pill-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.pill-scroll .pill-option {
+  flex-shrink: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+}
+
+.pill-scroll .pill-option.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}

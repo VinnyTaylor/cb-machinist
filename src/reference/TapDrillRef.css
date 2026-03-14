@@ -1,0 +1,73 @@
+.tapdrill-ref {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tapdrill-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.tapdrill-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tapdrill-table th,
+.tapdrill-table td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.tapdrill-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+}
+
+.tapdrill-table td {
+  font-size: 0.875rem;
+}
+
+.tapdrill-table td.mono {
+  font-family: var(--font-mono);
+  color: var(--muted2);
+}
+
+.thread-name {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.tap-drill {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent2);
+}
+
+.decimal {
+  font-family: var(--font-mono);
+  color: var(--accent3);
+}
+
+.tapdrill-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+}

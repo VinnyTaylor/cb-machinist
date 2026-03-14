@@ -1,0 +1,90 @@
+.manual-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.manual-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Chapters List */
+.chapters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chapter-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.chapter-header:hover {
+  background: var(--card2);
+}
+
+.chapter-header.expanded {
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-number {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 1.5rem;
+}
+
+.chapter-icon {
+  font-size: 1.125rem;
+}
+
+.chapter-title {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chapter-chevron {
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.chapter-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* Chapter Content */
+.chapter-content {
+  padding: 1rem;
+  background: var(--surface);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+}

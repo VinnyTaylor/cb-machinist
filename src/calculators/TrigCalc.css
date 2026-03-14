@@ -1,0 +1,44 @@
+.trig-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.triangle-diagram {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.triangle-svg {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+}
+
+.triangle-svg .label-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--muted2);
+}
+
+.trig-instruction {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 360px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

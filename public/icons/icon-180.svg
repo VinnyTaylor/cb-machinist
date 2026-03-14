@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <rect width="180" height="180" fill="#0B0D11"/>
+  <rect x="18" y="18" width="144" height="144" rx="18" fill="#13171E" stroke="#2A3140" stroke-width="1.44"/>
+  <circle cx="90" cy="45" r="16.92" fill="none" stroke="#F97316" stroke-width="3.6"/>
+  <line x1="105.2" y1="45.0" x2="115.4" y2="45.0" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="100.8" y1="55.8" x2="107.9" y2="62.9" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="90.0" y1="60.2" x2="90.0" y2="70.4" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="79.2" y1="55.8" x2="72.1" y2="62.9" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="74.8" y1="45.0" x2="64.6" y2="45.0" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="79.2" y1="34.2" x2="72.1" y2="27.1" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="90.0" y1="29.8" x2="90.0" y2="19.6" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="100.8" y1="34.2" x2="107.9" y2="27.1" stroke="#F97316" stroke-width="3.6" stroke-linecap="round"/>
+  <circle cx="90" cy="45" r="6.768000000000001" fill="#F97316"/>
+  <text x="90" y="112.5" font-family="Arial, Helvetica, sans-serif" font-size="45" font-weight="bold" fill="#F97316" text-anchor="middle">C&amp;B</text>
+  <text x="90" y="140.4" font-family="Arial, Helvetica, sans-serif" font-size="14.76" fill="#64748B" text-anchor="middle">MACHINIST</text>
+</svg>

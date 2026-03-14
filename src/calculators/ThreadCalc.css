@@ -1,0 +1,155 @@
+.thread-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.results-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.results-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 400px) {
+  .results-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.class-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Wire Section */
+.wire-description {
+  font-size: 0.875rem;
+  color: var(--muted2);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.m-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 1rem;
+}
+
+.m-range-label {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.m-range-value {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent2);
+}
+
+.pass-fail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-top: 0.75rem;
+}
+
+.pass-fail.pass {
+  background: rgba(34, 211, 160, 0.15);
+  border: 1px solid var(--accent3);
+}
+
+.pass-fail.fail {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--red);
+}
+
+.pf-label {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.pf-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pf-status {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.pass .pf-status {
+  color: var(--accent3);
+}
+
+.fail .pf-status {
+  color: var(--red);
+}
+
+.wire-table-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.wire-table-wrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wire-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.wire-table th,
+.wire-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.wire-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  letter-spacing: 0.5px;
+}
+
+.wire-table td {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.wire-table tbody tr:hover {
+  background: var(--surface);
+}

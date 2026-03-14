@@ -1,0 +1,74 @@
+.taper-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.taper-hint {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 400px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.taper-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0.75rem;
+}
+
+.taper-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.taper-table th,
+.taper-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.taper-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.taper-table td {
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.taper-table td.mono {
+  font-family: var(--font-mono);
+  color: var(--accent2);
+}
+
+.taper-table tr.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.taper-table tr.clickable:hover {
+  background: var(--surface);
+}
+
+.taper-table tr.clickable:active {
+  background: var(--card2);
+}

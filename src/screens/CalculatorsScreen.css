@@ -1,0 +1,68 @@
+.calculators-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Tab Bar */
+.calc-tabs {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.calc-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.calc-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.calc-tab:hover:not(.active) {
+  background: var(--card2);
+  color: var(--muted2);
+}
+
+.calc-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.tab-icon {
+  font-size: 0.875rem;
+}
+
+.tab-label {
+  /* Inherits from parent */
+}
+
+/* Calculator Content */
+.calc-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

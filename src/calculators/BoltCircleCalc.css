@@ -1,0 +1,97 @@
+.bolt-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bolt-preview {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.bolt-svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+.bolt-svg .hole-number {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  fill: white;
+}
+
+.bolt-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bolt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bolt-table th,
+.bolt-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.bolt-table th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bolt-table td {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.bolt-table .hole-num {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.bolt-table .coord {
+  color: var(--accent2);
+}
+
+.bolt-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.copy-coords-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-coords-btn:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.copy-coords-btn.copied {
+  background: var(--accent3);
+  border-color: var(--accent3);
+  color: var(--bg);
+}

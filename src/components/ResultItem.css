@@ -1,0 +1,57 @@
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.result-label {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-value-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.result-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.result-large .result-value {
+  font-size: 1.75rem;
+}
+
+.result-accent {
+  color: var(--accent);
+}
+
+.result-accent2 {
+  color: var(--accent2);
+}
+
+.result-accent3 {
+  color: var(--accent3);
+}
+
+.result-default {
+  color: var(--text);
+}
+
+.result-unit {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.result-large .result-unit {
+  font-size: 1rem;
+}
