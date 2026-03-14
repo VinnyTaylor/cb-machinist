@@ -41,24 +41,44 @@ export const TaperCalc: React.FC = () => {
     setState(defaultState);
   };
 
-  const results = useMemo(() => {
-    const d1 = parseFloat(state.d1) || 0;
-    const d2 = parseFloat(state.d2) || 0;
-    const length = parseFloat(state.length) || 0;
-    const tpf = parseFloat(state.tpf) || 0;
-    const halfAngle = parseFloat(state.halfAngle) || 0;
+  const { results, error } = useMemo(() => {
+    const d1 = parseFloat(state.d1);
+    const d2 = parseFloat(state.d2);
+    const length = parseFloat(state.length);
+    const tpf = parseFloat(state.tpf);
+    const halfAngle = parseFloat(state.halfAngle);
 
-    let resultD1 = d1, resultD2 = d2, resultLength = length;
+    // Validation
+    if (state.d1.trim() && (isNaN(d1) || d1 < 0)) {
+      return { results: null, error: 'D1 must be a positive number' };
+    }
+    if (state.d2.trim() && (isNaN(d2) || d2 < 0)) {
+      return { results: null, error: 'D2 must be a positive number' };
+    }
+    if (state.length.trim() && (isNaN(length) || length <= 0)) {
+      return { results: null, error: 'Length must be greater than 0' };
+    }
+    if (state.tpf.trim() && (isNaN(tpf) || tpf < 0)) {
+      return { results: null, error: 'Taper per foot must be positive' };
+    }
+    if (state.halfAngle.trim() && (isNaN(halfAngle) || halfAngle <= 0 || halfAngle >= 90)) {
+      return { results: null, error: 'Half angle must be between 0° and 90°' };
+    }
+
+    let resultD1 = d1 || 0, resultD2 = d2 || 0, resultLength = length || 0;
     let resultTPI = 0, resultTPF = 0, resultHalfAngle = 0, resultIncludedAngle = 0;
 
     // Determine what to calculate based on inputs
-    const hasD1 = state.d1.trim() !== '';
-    const hasD2 = state.d2.trim() !== '';
-    const hasLength = state.length.trim() !== '';
-    const hasTPF = state.tpf.trim() !== '';
-    const hasHalfAngle = state.halfAngle.trim() !== '';
+    const hasD1 = state.d1.trim() !== '' && !isNaN(d1);
+    const hasD2 = state.d2.trim() !== '' && !isNaN(d2);
+    const hasLength = state.length.trim() !== '' && !isNaN(length);
+    const hasTPF = state.tpf.trim() !== '' && !isNaN(tpf);
+    const hasHalfAngle = state.halfAngle.trim() !== '' && !isNaN(halfAngle);
 
     if (hasD1 && hasD2 && hasLength) {
+      if (d1 <= d2) {
+        return { results: null, error: 'D1 (large dia) must be greater than D2 (small dia)' };
+      }
       // Calculate from diameters and length
       resultTPI = (d1 - d2) / length;
       resultTPF = resultTPI * 12;
@@ -68,6 +88,9 @@ export const TaperCalc: React.FC = () => {
       // Calculate D2 from TPF
       resultTPI = tpf / 12;
       resultD2 = d1 - (resultTPI * length);
+      if (resultD2 < 0) {
+        return { results: null, error: 'Calculated D2 is negative - check your inputs' };
+      }
       resultHalfAngle = Math.atan(resultTPI / 2) * (180 / Math.PI);
       resultIncludedAngle = resultHalfAngle * 2;
       resultTPF = tpf;
@@ -82,10 +105,16 @@ export const TaperCalc: React.FC = () => {
       // Calculate D2 from half angle
       resultTPI = 2 * Math.tan(halfAngle * Math.PI / 180);
       resultD2 = d1 - (resultTPI * length);
+      if (resultD2 < 0) {
+        return { results: null, error: 'Calculated D2 is negative - angle too steep for given length' };
+      }
       resultTPF = resultTPI * 12;
       resultHalfAngle = halfAngle;
       resultIncludedAngle = halfAngle * 2;
     } else if (hasHalfAngle && hasD1 && hasD2) {
+      if (d1 <= d2) {
+        return { results: null, error: 'D1 (large dia) must be greater than D2 (small dia)' };
+      }
       // Calculate length from half angle and diameters
       resultTPI = 2 * Math.tan(halfAngle * Math.PI / 180);
       resultLength = (d1 - d2) / resultTPI;
@@ -93,21 +122,24 @@ export const TaperCalc: React.FC = () => {
       resultHalfAngle = halfAngle;
       resultIncludedAngle = halfAngle * 2;
     } else {
-      return null;
+      return { results: null, error: null };
     }
 
     if (resultD1 <= resultD2 || resultLength <= 0) {
-      return null;
+      return { results: null, error: 'Invalid taper geometry' };
     }
 
     return {
-      d1: resultD1.toFixed(4),
-      d2: resultD2.toFixed(4),
-      length: resultLength.toFixed(4),
-      tpi: resultTPI.toFixed(6),
-      tpf: resultTPF.toFixed(4),
-      halfAngle: resultHalfAngle.toFixed(4),
-      includedAngle: resultIncludedAngle.toFixed(4)
+      results: {
+        d1: resultD1.toFixed(4),
+        d2: resultD2.toFixed(4),
+        length: resultLength.toFixed(4),
+        tpi: resultTPI.toFixed(6),
+        tpf: resultTPF.toFixed(4),
+        halfAngle: resultHalfAngle.toFixed(4),
+        includedAngle: resultIncludedAngle.toFixed(4)
+      },
+      error: null
     };
   }, [state]);
 
@@ -173,12 +205,18 @@ export const TaperCalc: React.FC = () => {
           </div>
         </div>
 
-        <p className="taper-hint">
-          Enter D1, D2 + Length; or TPF + Length + one diameter; or Half Angle + two values
-        </p>
+        {error ? (
+          <NoteBox variant="warning">
+            {error}
+          </NoteBox>
+        ) : (
+          <p className="taper-hint">
+            Enter D1, D2 + Length; or TPF + Length + one diameter; or Half Angle + two values
+          </p>
+        )}
       </Card>
 
-      {results && (
+      {results && !error && (
         <Card title="Results" icon="📊">
           <div className="results-grid">
             <ResultItem label="Large Dia (D1)" value={results.d1} unit="in" variant="accent" />
