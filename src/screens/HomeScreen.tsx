@@ -59,7 +59,7 @@ export const HomeScreen: React.FC = () => {
       {/* Stats Row */}
       <div className="stats-row">
         <div className="stat-item">
-          <span className="stat-value">19</span>
+          <span className="stat-value">31</span>
           <span className="stat-label">Materials</span>
         </div>
         <div className="stat-divider" />
