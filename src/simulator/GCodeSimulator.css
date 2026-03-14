@@ -232,7 +232,116 @@
   resize: none;
 }
 
+.sim-code:has(.sim-saved-list) textarea {
+  border-radius: 0;
+}
+
 .sim-code textarea:focus {
   outline: none;
   border-color: #58a6ff;
+}
+
+/* Code actions row */
+.sim-code-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-save {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #238636;
+  border: 1px solid #2ea043;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-save:hover {
+  background: #2ea043;
+}
+
+.save-input-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.save-input-group input {
+  width: 100px;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #0d1117;
+  border: 1px solid #58a6ff;
+  border-radius: 4px;
+  color: #c9d1d9;
+}
+
+.save-input-group input:focus {
+  outline: none;
+}
+
+.btn-save-confirm,
+.btn-save-cancel {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-save-confirm {
+  background: #238636;
+  color: #fff;
+}
+
+.btn-save-cancel {
+  background: #30363d;
+  color: #8b949e;
+}
+
+.saved-select {
+  background: #21262d;
+  border: 1px solid #58a6ff;
+}
+
+/* Saved programs tags */
+.sim-saved-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.saved-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  color: #8b949e;
+}
+
+.saved-tag button {
+  padding: 0 2px;
+  font-size: 14px;
+  background: none;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.saved-tag button:hover {
+  color: #f85149;
 }

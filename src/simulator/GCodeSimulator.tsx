@@ -2,9 +2,15 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { parseProgram, generateToolpath } from './parser/gcode-parser';
 import { PillToggle } from '../components/PillToggle';
+import { useFavorites } from '../hooks/useFavorites';
 import type { MachineMode, Toolpath, Point3D, ToolpathSegment } from './types';
 import { samplePrograms } from './types';
 import './GCodeSimulator.css';
+
+interface SavedProgram {
+  code: string;
+  mode: MachineMode;
+}
 
 const defaultMillCode = `G20 G90 G17
 G0 X0 Y0 Z0.5
@@ -36,8 +42,13 @@ export const GCodeSimulator: React.FC = () => {
   const [currentSegment, setCurrentSegment] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState(400);
+  const [saveName, setSaveName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
 
   const intervalRef = useRef<number>(0);
+
+  // Favorites
+  const { favorites, addFavorite, removeFavorite } = useFavorites<SavedProgram>('gcode-programs');
 
   // Parse G-code into toolpath
   const toolpath: Toolpath | null = useMemo(() => {
@@ -332,6 +343,23 @@ export const GCodeSimulator: React.FC = () => {
     }
   };
 
+  const handleSaveProgram = () => {
+    if (saveName.trim()) {
+      addFavorite(saveName.trim(), { code: gcode, mode });
+      setSaveName('');
+      setShowSaveInput(false);
+    }
+  };
+
+  const handleLoadProgram = (id: string) => {
+    const program = favorites.find(f => f.id === id);
+    if (program) {
+      setGcode(program.data.code);
+      setMode(program.data.mode);
+      handleReset();
+    }
+  };
+
   return (
     <div className="sim-container">
       {/* Main Canvas - Center */}
@@ -402,18 +430,70 @@ export const GCodeSimulator: React.FC = () => {
         <div className="sim-code">
           <div className="sim-code-header">
             <span>G-CODE</span>
-            <select onChange={e => e.target.value && loadSample(e.target.value)} value="">
-              <option value="">Load Sample...</option>
-              {samplePrograms.filter(s => s.mode === mode).map(s => (
-                <option key={s.name} value={s.name}>{s.name}</option>
-              ))}
-            </select>
+            <div className="sim-code-actions">
+              {/* Save button */}
+              {!showSaveInput ? (
+                <button className="btn-save" onClick={() => setShowSaveInput(true)} title="Save program">
+                  Save
+                </button>
+              ) : (
+                <div className="save-input-group">
+                  <input
+                    type="text"
+                    value={saveName}
+                    onChange={e => setSaveName(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleSaveProgram();
+                      if (e.key === 'Escape') { setShowSaveInput(false); setSaveName(''); }
+                    }}
+                    placeholder="Name..."
+                    autoFocus
+                    maxLength={20}
+                  />
+                  <button className="btn-save-confirm" onClick={handleSaveProgram}>✓</button>
+                  <button className="btn-save-cancel" onClick={() => { setShowSaveInput(false); setSaveName(''); }}>✕</button>
+                </div>
+              )}
+              {/* Saved programs dropdown */}
+              {favorites.length > 0 && (
+                <select
+                  onChange={e => { if (e.target.value) handleLoadProgram(e.target.value); e.target.value = ''; }}
+                  value=""
+                  className="saved-select"
+                >
+                  <option value="">Saved ({favorites.length})</option>
+                  {favorites.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {f.name} ({f.data.mode})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {/* Sample programs dropdown */}
+              <select onChange={e => e.target.value && loadSample(e.target.value)} value="">
+                <option value="">Samples</option>
+                {samplePrograms.filter(s => s.mode === mode).map(s => (
+                  <option key={s.name} value={s.name}>{s.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <textarea
             value={gcode}
             onChange={e => { setGcode(e.target.value); handleReset(); }}
             spellCheck={false}
           />
+          {/* Delete saved programs */}
+          {favorites.length > 0 && (
+            <div className="sim-saved-list">
+              {favorites.map(f => (
+                <span key={f.id} className="saved-tag">
+                  {f.name}
+                  <button onClick={() => removeFavorite(f.id)} title="Delete">×</button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
