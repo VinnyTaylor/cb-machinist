@@ -6,6 +6,7 @@ import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
 import { ResetButton } from '../components/ResetButton';
 import { materials, getMaterialById } from '../data/materials';
+import { getToolingByMaterial } from '../data/tooling';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './SpeedsFeedsCalc.css';
 
@@ -265,6 +266,45 @@ export const SpeedsFeedsCalc: React.FC = () => {
             </Card>
           )}
 
+          {/* Tooling Recommendations */}
+          {(() => {
+            const tooling = getToolingByMaterial(millState.materialId);
+            if (!tooling.endMill) return null;
+            const rec = tooling.endMill;
+            return (
+              <Card title="Recommended Tooling" icon="🔧">
+                <div className="tooling-rec">
+                  <div className="tooling-rec-header">
+                    <span className="tooling-rec-title">End Mill for {tooling.category.replace('-', ' ')}</span>
+                  </div>
+                  <div className="tooling-rec-grid">
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Flutes</span>
+                      <span className="tooling-rec-value">{rec.fluteNote}</span>
+                    </div>
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Helix</span>
+                      <span className="tooling-rec-value">{rec.helix}</span>
+                    </div>
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Geometry</span>
+                      <span className="tooling-rec-value">{rec.geometry}</span>
+                    </div>
+                  </div>
+                  <div className="tooling-rec-coatings">
+                    <span className="tooling-rec-label">Coatings:</span>
+                    <span className="coating-tags">
+                      {rec.coating.map((c, i) => (
+                        <span key={i} className="coating-tag">{c}</span>
+                      ))}
+                    </span>
+                  </div>
+                  <p className="tooling-rec-notes">{rec.notes}</p>
+                </div>
+              </Card>
+            );
+          })()}
+
           {/* Material Tips */}
           {selectedMaterial && (
             <NoteBox variant="tip" title={selectedMaterial.name}>
@@ -368,6 +408,45 @@ export const SpeedsFeedsCalc: React.FC = () => {
               </div>
             </Card>
           )}
+
+          {/* Tooling Recommendations */}
+          {(() => {
+            const tooling = getToolingByMaterial(latheState.materialId);
+            if (!tooling.insert) return null;
+            const rec = tooling.insert;
+            return (
+              <Card title="Recommended Tooling" icon="📐">
+                <div className="tooling-rec">
+                  <div className="tooling-rec-header">
+                    <span className="tooling-rec-title">Insert for {tooling.category.replace('-', ' ')}</span>
+                  </div>
+                  <div className="tooling-rec-grid">
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Grade</span>
+                      <span className="tooling-rec-value">{rec.grade}</span>
+                    </div>
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Geometry</span>
+                      <span className="tooling-rec-value">{rec.geometry}</span>
+                    </div>
+                    <div className="tooling-rec-item">
+                      <span className="tooling-rec-label">Chipbreaker</span>
+                      <span className="tooling-rec-value">{rec.chipbreaker}</span>
+                    </div>
+                  </div>
+                  <div className="tooling-rec-coatings">
+                    <span className="tooling-rec-label">Coatings:</span>
+                    <span className="coating-tags">
+                      {rec.coating.map((c, i) => (
+                        <span key={i} className="coating-tag">{c}</span>
+                      ))}
+                    </span>
+                  </div>
+                  <p className="tooling-rec-notes">{rec.notes}</p>
+                </div>
+              </Card>
+            );
+          })()}
 
           {/* Material Tips */}
           {selectedLatheMaterial && (

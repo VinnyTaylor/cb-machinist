@@ -4,13 +4,15 @@ import { GCodeRef } from '../reference/GCodeRef';
 import { MaterialsRef } from '../reference/MaterialsRef';
 import { TapDrillRef } from '../reference/TapDrillRef';
 import { ThreadRef } from '../reference/ThreadRef';
+import { ToolingRef } from '../reference/ToolingRef';
 import './ReferenceScreen.css';
 
-type RefTab = 'gcode' | 'materials' | 'tapdrill' | 'thread';
+type RefTab = 'gcode' | 'materials' | 'tooling' | 'tapdrill' | 'thread';
 
 const tabs: { id: RefTab; label: string }[] = [
   { id: 'gcode', label: 'G-Codes' },
   { id: 'materials', label: 'Materials' },
+  { id: 'tooling', label: 'Tooling' },
   { id: 'tapdrill', label: 'Tap Drills' },
   { id: 'thread', label: 'Threads' }
 ];
@@ -33,6 +35,8 @@ export const ReferenceScreen: React.FC = () => {
         return <GCodeRef />;
       case 'materials':
         return <MaterialsRef />;
+      case 'tooling':
+        return <ToolingRef />;
       case 'tapdrill':
         return <TapDrillRef />;
       case 'thread':
