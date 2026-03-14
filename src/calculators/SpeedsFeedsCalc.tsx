@@ -5,9 +5,11 @@ import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
 import { ResetButton } from '../components/ResetButton';
+import { FavoritesPanel } from '../components/FavoritesPanel';
 import { materials, getMaterialById } from '../data/materials';
 import { getToolingByMaterial } from '../data/tooling';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useFavorites } from '../hooks/useFavorites';
 import './SpeedsFeedsCalc.css';
 
 type Operation = 'roughing' | 'finishing';
@@ -54,6 +56,9 @@ export const SpeedsFeedsCalc: React.FC = () => {
 
   const [millState, setMillState] = useLocalStorage<MillState>('speeds-mill', defaultMillState);
   const [latheState, setLatheState] = useLocalStorage<LatheState>('speeds-lathe', defaultLatheState);
+
+  const millFavorites = useFavorites<MillState>('speeds-mill');
+  const latheFavorites = useFavorites<LatheState>('speeds-lathe');
 
   const handleResetMill = () => {
     setMillState(defaultMillState);
@@ -107,13 +112,28 @@ export const SpeedsFeedsCalc: React.FC = () => {
   };
 
   // Mill calculations
-  const millResults = useMemo(() => {
-    const sfm = parseFloat(millState.sfm) || 0;
-    const dia = parseFloat(millState.diameter) || 0;
-    const flutes = parseInt(millState.flutes) || 0;
-    const chipLoad = parseFloat(millState.chipLoad) || 0;
+  const { millResults, millError } = useMemo(() => {
+    const sfm = parseFloat(millState.sfm);
+    const dia = parseFloat(millState.diameter);
+    const flutes = parseInt(millState.flutes);
+    const chipLoad = parseFloat(millState.chipLoad);
 
-    if (dia <= 0) return null;
+    // Validation
+    if (isNaN(sfm) || sfm <= 0) {
+      return { millResults: null, millError: millState.sfm ? 'SFM must be greater than 0' : null };
+    }
+    if (isNaN(dia) || dia <= 0) {
+      return { millResults: null, millError: millState.diameter ? 'Cutter diameter must be greater than 0' : null };
+    }
+    if (isNaN(flutes) || flutes < 1) {
+      return { millResults: null, millError: millState.flutes ? 'Number of flutes must be at least 1' : null };
+    }
+    if (flutes > 12) {
+      return { millResults: null, millError: 'Number of flutes cannot exceed 12' };
+    }
+    if (isNaN(chipLoad) || chipLoad <= 0) {
+      return { millResults: null, millError: millState.chipLoad ? 'Chip load must be greater than 0' : null };
+    }
 
     const rpm = (sfm * 3.82) / dia;
     const feedIPM = rpm * chipLoad * flutes;
@@ -121,31 +141,49 @@ export const SpeedsFeedsCalc: React.FC = () => {
     const mrr = feedIPM * dia * 0.1; // Rough estimate with 0.1" DOC
 
     return {
-      rpm: Math.round(rpm),
-      feedIPM: feedIPM.toFixed(1),
-      sfmVerify: sfmVerify.toFixed(0),
-      mrr: mrr.toFixed(2)
+      millResults: {
+        rpm: Math.round(rpm),
+        feedIPM: feedIPM.toFixed(1),
+        sfmVerify: sfmVerify.toFixed(0),
+        mrr: mrr.toFixed(2)
+      },
+      millError: null
     };
   }, [millState]);
 
   // Lathe calculations
-  const latheResults = useMemo(() => {
-    const partDia = parseFloat(latheState.partDiameter) || 0;
-    const sfm = parseFloat(latheState.sfm) || 0;
-    const feedIPR = parseFloat(latheState.feedIPR) || 0;
-    const maxRPM = parseInt(latheState.maxRPM) || 3000;
+  const { latheResults, latheError } = useMemo(() => {
+    const partDia = parseFloat(latheState.partDiameter);
+    const sfm = parseFloat(latheState.sfm);
+    const feedIPR = parseFloat(latheState.feedIPR);
+    const maxRPM = parseInt(latheState.maxRPM);
 
-    if (partDia <= 0) return null;
+    // Validation
+    if (isNaN(partDia) || partDia <= 0) {
+      return { latheResults: null, latheError: latheState.partDiameter ? 'Part diameter must be greater than 0' : null };
+    }
+    if (isNaN(sfm) || sfm <= 0) {
+      return { latheResults: null, latheError: latheState.sfm ? 'SFM must be greater than 0' : null };
+    }
+    if (isNaN(feedIPR) || feedIPR <= 0) {
+      return { latheResults: null, latheError: latheState.feedIPR ? 'Feed IPR must be greater than 0' : null };
+    }
+    if (isNaN(maxRPM) || maxRPM <= 0) {
+      return { latheResults: null, latheError: latheState.maxRPM ? 'Max RPM must be greater than 0' : null };
+    }
 
     const calcRPM = (sfm * 3.82) / partDia;
     const rpm = Math.min(Math.round(calcRPM), maxRPM);
     const feedIPM = rpm * feedIPR;
 
     return {
-      rpm,
-      feedIPM: feedIPM.toFixed(1),
-      g50: maxRPM,
-      cssCode: `G50 S${maxRPM}\nG96 S${Math.round(sfm)} M03\nG01 F${feedIPR} G99`
+      latheResults: {
+        rpm,
+        feedIPM: feedIPM.toFixed(1),
+        g50: maxRPM,
+        cssCode: `G50 S${maxRPM}\nG96 S${Math.round(sfm)} M03\nG01 F${feedIPR} G99`
+      },
+      latheError: null
     };
   }, [latheState]);
 
@@ -171,6 +209,18 @@ export const SpeedsFeedsCalc: React.FC = () => {
             <div className="card-header-row">
               <ResetButton onClick={handleResetMill} />
             </div>
+
+            <FavoritesPanel
+              favorites={millFavorites.favorites}
+              onLoad={(data) => setMillState(data)}
+              onSave={(name) => millFavorites.addFavorite(name, millState)}
+              onDelete={(id) => millFavorites.removeFavorite(id)}
+              formatPreview={(data) => {
+                const mat = getMaterialById(data.materialId);
+                return `${mat?.name || data.materialId} • ⌀${data.diameter}" • ${data.flutes}F`;
+              }}
+            />
+
             <div className="form-group">
               <label>Material</label>
               <select
@@ -243,6 +293,12 @@ export const SpeedsFeedsCalc: React.FC = () => {
                 />
               </div>
             </div>
+
+            {millError && (
+              <NoteBox variant="warning" title="Error">
+                {millError}
+              </NoteBox>
+            )}
           </Card>
 
           {/* Mill Results */}
@@ -319,6 +375,18 @@ export const SpeedsFeedsCalc: React.FC = () => {
             <div className="card-header-row">
               <ResetButton onClick={handleResetLathe} />
             </div>
+
+            <FavoritesPanel
+              favorites={latheFavorites.favorites}
+              onLoad={(data) => setLatheState(data)}
+              onSave={(name) => latheFavorites.addFavorite(name, latheState)}
+              onDelete={(id) => latheFavorites.removeFavorite(id)}
+              formatPreview={(data) => {
+                const mat = getMaterialById(data.materialId);
+                return `${mat?.name || data.materialId} • ⌀${data.partDiameter}"`;
+              }}
+            />
+
             <div className="form-group">
               <label>Material</label>
               <select
@@ -390,6 +458,12 @@ export const SpeedsFeedsCalc: React.FC = () => {
                 />
               </div>
             </div>
+
+            {latheError && (
+              <NoteBox variant="warning" title="Error">
+                {latheError}
+              </NoteBox>
+            )}
           </Card>
 
           {/* Lathe Results */}

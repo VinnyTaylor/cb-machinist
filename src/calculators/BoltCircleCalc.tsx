@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Card } from '../components/Card';
 import { ResetButton } from '../components/ResetButton';
+import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './BoltCircleCalc.css';
 
@@ -35,19 +36,34 @@ export const BoltCircleCalc: React.FC = () => {
     setState(defaultState);
   };
 
-  const holes = useMemo((): HolePosition[] => {
-    const bcd = parseFloat(state.bcd) || 0;
-    const numHoles = parseInt(state.numHoles) || 0;
+  const { holes, error } = useMemo((): { holes: HolePosition[], error: string | null } => {
+    const bcd = parseFloat(state.bcd);
+    const numHoles = parseInt(state.numHoles);
     const startAngle = parseFloat(state.startAngle) || 0;
     const centerX = parseFloat(state.centerX) || 0;
     const centerY = parseFloat(state.centerY) || 0;
 
-    if (bcd <= 0 || numHoles <= 0) return [];
+    // Validation
+    if (isNaN(bcd) || state.bcd.trim() === '') {
+      return { holes: [], error: null }; // No error for empty input
+    }
+    if (bcd <= 0) {
+      return { holes: [], error: 'BCD diameter must be greater than 0' };
+    }
+    if (isNaN(numHoles) || state.numHoles.trim() === '') {
+      return { holes: [], error: null };
+    }
+    if (numHoles < 2) {
+      return { holes: [], error: 'Number of holes must be at least 2' };
+    }
+    if (numHoles > 36) {
+      return { holes: [], error: 'Number of holes cannot exceed 36' };
+    }
 
     const radius = bcd / 2;
     const angleStep = 360 / numHoles;
 
-    return Array.from({ length: numHoles }, (_, i) => {
+    const positions = Array.from({ length: numHoles }, (_, i) => {
       const angle = startAngle + i * angleStep;
       const angleRad = (angle * Math.PI) / 180;
       const x = centerX + radius * Math.cos(angleRad);
@@ -60,6 +76,8 @@ export const BoltCircleCalc: React.FC = () => {
         y
       };
     });
+
+    return { holes: positions, error: null };
   }, [state]);
 
   const handleCopyCoordinates = async () => {
@@ -145,6 +163,12 @@ export const BoltCircleCalc: React.FC = () => {
             />
           </div>
         </div>
+
+        {error && (
+          <NoteBox variant="warning" title="Error">
+            {error}
+          </NoteBox>
+        )}
       </Card>
 
       {/* Visual Preview */}

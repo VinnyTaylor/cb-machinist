@@ -1,0 +1,195 @@
+.favorites-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.favorites-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.favorites-toggle:hover {
+  background: var(--card);
+}
+
+.favorites-icon {
+  font-size: 1rem;
+}
+
+.favorites-label {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.favorites-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: var(--card);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-xs);
+}
+
+.favorites-chevron {
+  font-size: 0.625rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.favorites-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.favorites-content {
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.favorites-save-btn {
+  width: 100%;
+  padding: 0.625rem;
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.favorites-save-btn:hover {
+  background: var(--card2);
+  border-color: var(--accent);
+}
+
+.favorites-save-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.favorites-save-form input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.favorites-save-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.favorites-save-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-confirm {
+  background: var(--accent);
+  color: white;
+  border: none;
+}
+
+.save-confirm:hover {
+  background: #ea6a10;
+}
+
+.save-cancel {
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.save-cancel:hover {
+  background: var(--card2);
+}
+
+.favorites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.favorite-load {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.favorite-load:hover {
+  background: var(--card2);
+}
+
+.favorite-name {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.favorite-preview {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+.favorite-delete {
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.favorite-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.favorites-empty {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 0.5rem;
+  margin: 0;
+}

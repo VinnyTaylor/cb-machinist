@@ -1,8 +1,8 @@
-/* C&B Machinist - Dark Industrial Theme */
+/* C&B Machinist - Theme System */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors */
+  /* Dark Theme (Default) */
   --bg: #0B0D11;
   --surface: #13171E;
   --card: #1A1F2A;
@@ -33,6 +33,23 @@
 
   /* Bottom nav height */
   --nav-height: 64px;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg: #F1F5F9;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --card2: #F8FAFC;
+  --border: #CBD5E1;
+  --accent: #EA580C;
+  --accent2: #0284C7;
+  --accent3: #059669;
+  --red: #DC2626;
+  --text: #1E293B;
+  --muted: #64748B;
+  --muted2: #475569;
+  --code-bg: #F1F5F9;
 }
 
 /* Reset */
