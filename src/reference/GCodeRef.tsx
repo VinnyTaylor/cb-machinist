@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { SearchBar } from '../components/SearchBar';
-import { gCodes, GCode } from '../data/gcodes';
+import { gCodes, GCode, isoGroups } from '../data/gcodes';
 import './GCodeRef.css';
 
 type FilterType = 'All' | 'Mill' | 'Lathe' | 'Both';
+type ViewMode = 'list' | 'groups';
 
 export const GCodeRef: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('All');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   const filteredCodes = useMemo(() => {
     let codes = gCodes;
@@ -24,12 +26,24 @@ export const GCodeRef: React.FC = () => {
         c.code.toLowerCase().includes(query) ||
         c.description.toLowerCase().includes(query) ||
         c.haasNote?.toLowerCase().includes(query) ||
-        c.fanucNote?.toLowerCase().includes(query)
+        c.fanucNote?.toLowerCase().includes(query) ||
+        c.group?.toLowerCase().includes(query)
       );
     }
 
     return codes;
   }, [search, filter]);
+
+  // Group codes by ISO group
+  const groupedCodes = useMemo(() => {
+    const groups: Record<string, GCode[]> = {};
+    filteredCodes.forEach(code => {
+      const group = code.group || '00';
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(code);
+    });
+    return groups;
+  }, [filteredCodes]);
 
   return (
     <div className="gcode-ref">
@@ -39,23 +53,59 @@ export const GCodeRef: React.FC = () => {
         placeholder="Search G/M codes..."
       />
 
-      <div className="filter-pills">
-        {(['All', 'Mill', 'Lathe', 'Both'] as FilterType[]).map((f) => (
+      <div className="filter-row">
+        <div className="filter-pills">
+          {(['All', 'Mill', 'Lathe', 'Both'] as FilterType[]).map((f) => (
+            <button
+              key={f}
+              className={`filter-pill ${filter === f ? 'active' : ''}`}
+              onClick={() => setFilter(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <div className="view-toggle">
           <button
-            key={f}
-            className={`filter-pill ${filter === f ? 'active' : ''}`}
-            onClick={() => setFilter(f)}
+            className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+            title="List view"
           >
-            {f}
+            ≡
           </button>
-        ))}
+          <button
+            className={`view-btn ${viewMode === 'groups' ? 'active' : ''}`}
+            onClick={() => setViewMode('groups')}
+            title="Group by ISO"
+          >
+            ⊞
+          </button>
+        </div>
       </div>
 
-      <div className="gcode-list">
-        {filteredCodes.map((code) => (
-          <GCodeItem key={code.code} code={code} />
-        ))}
-      </div>
+      {viewMode === 'list' ? (
+        <div className="gcode-list">
+          {filteredCodes.map((code) => (
+            <GCodeItem key={code.code} code={code} />
+          ))}
+        </div>
+      ) : (
+        <div className="gcode-groups">
+          {Object.entries(groupedCodes).map(([group, codes]) => (
+            <div key={group} className="gcode-group">
+              <div className="group-header">
+                <span className="group-id">Group {group}</span>
+                <span className="group-desc">{isoGroups[group] || 'Other'}</span>
+              </div>
+              <div className="group-codes">
+                {codes.map((code) => (
+                  <GCodeItem key={code.code} code={code} compact />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {filteredCodes.length === 0 && (
         <div className="no-results">
@@ -66,7 +116,7 @@ export const GCodeRef: React.FC = () => {
   );
 };
 
-const GCodeItem: React.FC<{ code: GCode }> = ({ code }) => {
+const GCodeItem: React.FC<{ code: GCode; compact?: boolean }> = ({ code, compact }) => {
   const [expanded, setExpanded] = useState(false);
 
   const typeColors: Record<string, string> = {
@@ -77,7 +127,7 @@ const GCodeItem: React.FC<{ code: GCode }> = ({ code }) => {
 
   return (
     <div
-      className={`gcode-item ${expanded ? 'expanded' : ''}`}
+      className={`gcode-item ${expanded ? 'expanded' : ''} ${compact ? 'compact' : ''}`}
       onClick={() => setExpanded(!expanded)}
     >
       <div className="gcode-header">
@@ -88,6 +138,9 @@ const GCodeItem: React.FC<{ code: GCode }> = ({ code }) => {
         >
           {code.type}
         </span>
+        {!compact && code.group && (
+          <span className="gcode-group-badge">{code.group}</span>
+        )}
         <span className="gcode-desc">{code.description}</span>
       </div>
 

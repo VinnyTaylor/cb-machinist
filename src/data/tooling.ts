@@ -1,5 +1,203 @@
 // Tooling recommendations and reference data
 
+// Flute count guidance - why and when to use more or fewer flutes
+export interface FluteGuidance {
+  fluteCount: string;
+  chipLoad: string;
+  rigidity: string;
+  chipEvacuation: string;
+  bestFor: string[];
+  notes: string;
+}
+
+export const fluteGuidance: FluteGuidance[] = [
+  {
+    fluteCount: '1-2 flutes',
+    chipLoad: 'Highest chip load per tooth',
+    rigidity: 'Lower rigidity',
+    chipEvacuation: 'Excellent - large gullets',
+    bestFor: ['Aluminum', 'Plastics', 'Soft materials', 'Slotting', 'Deep pockets'],
+    notes: 'More room for chips to escape. Prevents chip re-cutting and heat buildup. Essential for gummy materials that produce long, stringy chips.'
+  },
+  {
+    fluteCount: '3 flutes',
+    chipLoad: 'Balanced chip load',
+    rigidity: 'Moderate rigidity',
+    chipEvacuation: 'Good',
+    bestFor: ['Aluminum (finishing)', 'General purpose', 'Balanced roughing/finishing'],
+    notes: 'Good compromise between chip evacuation and surface finish. Popular for aluminum when higher feeds are needed but 2-flute is insufficient.'
+  },
+  {
+    fluteCount: '4 flutes',
+    chipLoad: 'Moderate chip load',
+    rigidity: 'Good rigidity',
+    chipEvacuation: 'Moderate',
+    bestFor: ['Steel', 'Cast iron', 'General purpose metals', 'Side milling'],
+    notes: 'Standard for ferrous materials. More cutting edges means higher feed rates at same chip load, or better finish at same feed. Good strength for side loads.'
+  },
+  {
+    fluteCount: '5-6 flutes',
+    chipLoad: 'Lower chip load per tooth',
+    rigidity: 'High rigidity',
+    chipEvacuation: 'Limited',
+    bestFor: ['Stainless steel', 'High-temp alloys', 'Finishing passes', 'Hardened materials'],
+    notes: 'More edges in cut = smoother finish and higher feed rates. Reduced chip load per tooth helps with work-hardening materials. Light DOC required.'
+  },
+  {
+    fluteCount: '7+ flutes',
+    chipLoad: 'Lowest chip load per tooth',
+    rigidity: 'Maximum rigidity',
+    chipEvacuation: 'Very limited',
+    bestFor: ['Superalloys', 'Hardened steel (45+ HRC)', 'High-speed finishing'],
+    notes: 'For difficult materials where tool engagement must be light. Very high feed rates possible with light DOC. Requires rigid setup and proper speeds.'
+  }
+];
+
+// Flute count decision factors
+export const fluteDecisionFactors = {
+  moreFlutes: {
+    title: 'When to Use MORE Flutes',
+    factors: [
+      'Harder materials (stainless, hardened steel, superalloys)',
+      'Finishing operations requiring smooth surface',
+      'Side milling where rigidity matters',
+      'Higher feed rates needed (more teeth = higher feed at same chip load)',
+      'Materials prone to work hardening (need light chip load)',
+      'Rigid setups with good workholding'
+    ]
+  },
+  fewerFlutes: {
+    title: 'When to Use FEWER Flutes',
+    factors: [
+      'Soft, gummy materials (aluminum, plastics, brass)',
+      'Slotting operations (full-width cuts)',
+      'Deep pockets where chips must escape',
+      'Materials producing long, stringy chips',
+      'Less rigid setups or long tool stick-out',
+      'Roughing operations removing lots of material'
+    ]
+  },
+  tradeoffs: {
+    title: 'Key Trade-offs',
+    points: [
+      'Feed rate = RPM × chip load × number of flutes (more flutes = higher feed)',
+      'Chip gullet size decreases with more flutes (less room for chips)',
+      'Tool rigidity increases with more flutes (larger core diameter)',
+      'Surface finish improves with more flutes (more cutting edges)',
+      'Heat per tooth decreases with more flutes (load is distributed)'
+    ]
+  }
+};
+
+// Coating overview - quick comparison guide
+export interface CoatingOverview {
+  coating: string;
+  color: string;
+  priceRange: string;
+  heatResistance: string;
+  primaryUse: string;
+  quickTip: string;
+}
+
+export const coatingOverview: CoatingOverview[] = [
+  {
+    coating: 'Uncoated (Bright)',
+    color: 'Silver/Gray',
+    priceRange: '$',
+    heatResistance: 'Low',
+    primaryUse: 'Aluminum, non-ferrous',
+    quickTip: 'Sharp edge, no BUE. Cheapest option for aluminum.'
+  },
+  {
+    coating: 'TiN',
+    color: 'Gold',
+    priceRange: '$$',
+    heatResistance: 'Medium',
+    primaryUse: 'General purpose, mild steel',
+    quickTip: 'Classic gold coating. Good all-around performer.'
+  },
+  {
+    coating: 'TiCN',
+    color: 'Blue-Gray',
+    priceRange: '$$',
+    heatResistance: 'Medium',
+    primaryUse: 'Stainless, abrasive materials',
+    quickTip: 'Harder than TiN but less heat tolerant. Good for abrasive cuts.'
+  },
+  {
+    coating: 'TiAlN',
+    color: 'Purple/Violet',
+    priceRange: '$$$',
+    heatResistance: 'High',
+    primaryUse: 'Steels, stainless, cast iron',
+    quickTip: 'Excellent heat resistance. Great for dry machining steel.'
+  },
+  {
+    coating: 'AlTiN',
+    color: 'Black/Dark',
+    priceRange: '$$$$',
+    heatResistance: 'Very High',
+    primaryUse: 'Hardened steel, titanium, superalloys',
+    quickTip: 'Premium coating for difficult materials. Aerospace standard.'
+  },
+  {
+    coating: 'DLC',
+    color: 'Black',
+    priceRange: '$$$$',
+    heatResistance: 'Low',
+    primaryUse: 'Aluminum, copper, graphite, composites',
+    quickTip: 'Extremely slick. Prevents aluminum from sticking. Premium non-ferrous.'
+  },
+  {
+    coating: 'ZrN',
+    color: 'Light Gold',
+    priceRange: '$$$',
+    heatResistance: 'Medium',
+    primaryUse: 'Aluminum, non-ferrous, plastics',
+    quickTip: 'Low friction like DLC but cheaper. Great aluminum alternative.'
+  }
+];
+
+// Coating selection quick guide
+export const coatingSelectionGuide = {
+  aluminum: {
+    material: 'Aluminum',
+    recommended: ['Uncoated', 'ZrN', 'DLC'],
+    avoid: ['TiAlN', 'AlTiN'],
+    reason: 'Aluminum welds to aluminum-containing coatings at high temps. Slick coatings prevent BUE.'
+  },
+  steel: {
+    material: 'Steel (Mild/Alloy)',
+    recommended: ['TiN', 'TiAlN', 'TiCN'],
+    avoid: ['Uncoated', 'DLC'],
+    reason: 'Coatings add heat resistance and hardness needed for ferrous materials.'
+  },
+  stainless: {
+    material: 'Stainless Steel',
+    recommended: ['TiAlN', 'AlTiN'],
+    avoid: ['Uncoated', 'TiN'],
+    reason: 'Work-hardens quickly. Need sharp edge + heat resistance. TiAlN/AlTiN excel here.'
+  },
+  titanium: {
+    material: 'Titanium',
+    recommended: ['AlTiN', 'Uncoated'],
+    avoid: ['TiN', 'DLC'],
+    reason: 'Generates extreme heat. AlTiN handles it. Some prefer uncoated for sharpest edge.'
+  },
+  hardened: {
+    material: 'Hardened Steel (45+ HRC)',
+    recommended: ['AlTiN'],
+    avoid: ['TiN', 'Uncoated', 'DLC'],
+    reason: 'Only premium coatings survive. Consider CBN tooling for best results.'
+  },
+  plastic: {
+    material: 'Plastics',
+    recommended: ['Uncoated', 'DLC'],
+    avoid: ['TiAlN', 'AlTiN'],
+    reason: 'Need sharpest possible edge to cut cleanly without melting. No heat benefits needed.'
+  }
+};
+
 export interface ToolCoating {
   id: string;
   name: string;
