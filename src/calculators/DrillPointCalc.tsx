@@ -173,9 +173,11 @@ export const DrillPointCalc: React.FC = () => {
             </div>
           )}
 
-          <NoteBox variant="tip" style={{ marginTop: '1rem' }}>
-            Total Drill Depth = Desired Flat Depth + Point Length
-          </NoteBox>
+          <div style={{ marginTop: '1rem' }}>
+            <NoteBox variant="tip">
+              Total Drill Depth = Desired Flat Depth + Point Length
+            </NoteBox>
+          </div>
         </Card>
       )}
 
