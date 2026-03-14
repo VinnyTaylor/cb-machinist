@@ -21,6 +21,8 @@ interface MillState {
 }
 
 interface LatheState {
+  materialId: string;
+  operation: Operation;
   partDiameter: string;
   sfm: string;
   feedIPR: string;
@@ -40,8 +42,10 @@ export const SpeedsFeedsCalc: React.FC = () => {
   });
 
   const [latheState, setLatheState] = useLocalStorage<LatheState>('speeds-lathe', {
+    materialId: 'aluminum-6061',
+    operation: 'roughing',
     partDiameter: '2.0',
-    sfm: '400',
+    sfm: '800',
     feedIPR: '0.008',
     maxRPM: '3000'
   });
@@ -65,6 +69,27 @@ export const SpeedsFeedsCalc: React.FC = () => {
     if (mat) {
       const sfm = operation === 'roughing' ? mat.roughSFM : mat.finishSFM;
       setMillState({ ...millState, operation, sfm: String(sfm) });
+    }
+  };
+
+  // Lathe material/operation handlers
+  const handleLatheMaterialChange = (materialId: string) => {
+    const mat = getMaterialById(materialId);
+    if (mat) {
+      const sfm = latheState.operation === 'roughing' ? mat.roughSFM : mat.finishSFM;
+      setLatheState({
+        ...latheState,
+        materialId,
+        sfm: String(sfm)
+      });
+    }
+  };
+
+  const handleLatheOperationChange = (operation: Operation) => {
+    const mat = getMaterialById(latheState.materialId);
+    if (mat) {
+      const sfm = operation === 'roughing' ? mat.roughSFM : mat.finishSFM;
+      setLatheState({ ...latheState, operation, sfm: String(sfm) });
     }
   };
 
@@ -112,6 +137,7 @@ export const SpeedsFeedsCalc: React.FC = () => {
   }, [latheState]);
 
   const selectedMaterial = getMaterialById(millState.materialId);
+  const selectedLatheMaterial = getMaterialById(latheState.materialId);
 
   return (
     <div className="speeds-calc">
@@ -235,6 +261,33 @@ export const SpeedsFeedsCalc: React.FC = () => {
         <>
           {/* Lathe Calculator */}
           <Card title="Lathe / CSS Mode" icon="🔧">
+            <div className="form-group">
+              <label>Material</label>
+              <select
+                value={latheState.materialId}
+                onChange={(e) => handleLatheMaterialChange(e.target.value)}
+              >
+                {materials.map((mat) => (
+                  <option key={mat.id} value={mat.id}>
+                    {mat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Operation</label>
+              <PillToggle
+                options={[
+                  { value: 'roughing', label: 'Roughing' },
+                  { value: 'finishing', label: 'Finishing' }
+                ]}
+                value={latheState.operation}
+                onChange={handleLatheOperationChange}
+                fullWidth
+              />
+            </div>
+
             <div className="grid-2">
               <div className="form-group">
                 <label>Part Diameter</label>
@@ -296,6 +349,13 @@ export const SpeedsFeedsCalc: React.FC = () => {
                 <CodeBlock title="CSS G-Code" code={latheResults.cssCode} />
               </div>
             </Card>
+          )}
+
+          {/* Material Tips */}
+          {selectedLatheMaterial && (
+            <NoteBox variant="tip" title={selectedLatheMaterial.name}>
+              {selectedLatheMaterial.notes}
+            </NoteBox>
           )}
 
           <NoteBox variant="info" title="CSS Mode">
