@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react';
 import { BottomNav } from './components/BottomNav';
 import { InstallBanner } from './components/InstallBanner';
 import { ThemeProvider } from './hooks/useTheme';
+import { UnitProvider } from './hooks/useUnits';
 import { HomeScreen } from './screens/HomeScreen';
 import { CalculatorsScreen } from './screens/CalculatorsScreen';
 import { ReferenceScreen } from './screens/ReferenceScreen';
@@ -28,7 +29,8 @@ const SimulatorLoading = () => (
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <UnitProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/calculators" element={<CalculatorsScreen />} />
@@ -43,6 +45,7 @@ function App() {
         <BottomNav />
         <InstallBanner />
       </BrowserRouter>
+      </UnitProvider>
     </ThemeProvider>
   );
 }

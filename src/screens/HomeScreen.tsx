@@ -5,6 +5,7 @@ import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { getRandomTip } from '../data/tips';
 import { useTheme } from '../hooks/useTheme';
+import { useUnits } from '../hooks/useUnits';
 import './HomeScreen.css';
 
 const quickTiles = [
@@ -25,6 +26,7 @@ Thread Depth   = 0.6495 × Pitch`;
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { units, toggleUnits } = useUnits();
   const tip = useMemo(() => getRandomTip(), []);
 
   const handleTileClick = (tile: typeof quickTiles[0]) => {
@@ -42,13 +44,22 @@ export const HomeScreen: React.FC = () => {
           <h1 className="app-title">Machinist Pro</h1>
           <p className="app-subtitle">C&B Technology</p>
         </div>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
+        <div className="header-toggles">
+          <button
+            className="unit-toggle"
+            onClick={toggleUnits}
+            aria-label={`Switch to ${units === 'imperial' ? 'metric' : 'imperial'} units`}
+          >
+            {units === 'imperial' ? 'IN' : 'MM'}
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
       </div>
 
       {/* Quick Launch Grid */}

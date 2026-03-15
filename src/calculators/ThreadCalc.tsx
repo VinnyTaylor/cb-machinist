@@ -5,7 +5,7 @@ import { CodeBlock } from '../components/CodeBlock';
 import { NoteBox } from '../components/NoteBox';
 import { PillToggle } from '../components/PillToggle';
 import { ResetButton } from '../components/ResetButton';
-import { standardThreads, metricThreads, metricFineThreads, externalClasses, internalClasses, getThreadByName } from '../data/threads';
+import { standardThreads, metricThreads, metricFineThreads, nptThreads, bsptThreads, externalClasses, internalClasses, getThreadByName, getPipeThreadByName } from '../data/threads';
 import { getBestWireSize, calculateMOverWires, calculatePitchDiameterFromM, wireReferenceData } from '../data/wireData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import './ThreadCalc.css';
@@ -13,7 +13,7 @@ import './ThreadCalc.css';
 type InputMode = 'standard' | 'custom';
 type ThreadType = 'un60' | 'iso60' | 'whitworth55' | 'acme29';
 type ThreadSide = 'external' | 'internal';
-type ThreadSystem = 'imperial' | 'metric' | 'metricFine';
+type ThreadSystem = 'imperial' | 'metric' | 'metricFine' | 'npt' | 'bspt';
 
 interface ThreadState {
   inputMode: InputMode;
@@ -54,9 +54,18 @@ const getThreadsForSystem = (system: ThreadSystem) => {
       return metricThreads;
     case 'metricFine':
       return metricFineThreads;
+    case 'npt':
+      return nptThreads;
+    case 'bspt':
+      return bsptThreads;
     default:
       return standardThreads;
   }
+};
+
+// Check if a thread system is pipe thread
+const isPipeSystem = (system: ThreadSystem): boolean => {
+  return system === 'npt' || system === 'bspt';
 };
 
 export const ThreadCalc: React.FC = () => {
@@ -69,13 +78,29 @@ export const ThreadCalc: React.FC = () => {
 
   // Get thread parameters based on input mode
   const threadParams = useMemo(() => {
+    // Handle pipe threads
+    if (isPipeSystem(state.threadSystem)) {
+      const pipeThread = getPipeThreadByName(state.standardSize);
+      if (pipeThread) {
+        return {
+          majorDia: pipeThread.majorDia,
+          tpi: pipeThread.tpi,
+          pitch: 1 / pipeThread.tpi,
+          isPipe: true,
+          pipeData: pipeThread
+        };
+      }
+    }
+
     if (state.inputMode === 'standard') {
       const thread = getThreadByName(state.standardSize);
       if (thread) {
         return {
           majorDia: thread.majorDia,
           tpi: thread.tpi,
-          pitch: thread.pitch
+          pitch: thread.pitch,
+          isPipe: false,
+          pipeData: null
         };
       }
     }
@@ -83,13 +108,35 @@ export const ThreadCalc: React.FC = () => {
     return {
       majorDia: parseFloat(state.customMajorDia) || 0.25,
       tpi,
-      pitch: 1 / tpi
+      pitch: 1 / tpi,
+      isPipe: false,
+      pipeData: null
     };
-  }, [state.inputMode, state.standardSize, state.customMajorDia, state.customTPI]);
+  }, [state.inputMode, state.standardSize, state.customMajorDia, state.customTPI, state.threadSystem]);
 
   // Basic thread calculations
   const basicResults = useMemo(() => {
-    const { majorDia, tpi, pitch } = threadParams;
+    const { majorDia, tpi, pitch, isPipe, pipeData } = threadParams;
+
+    // For pipe threads, use pre-calculated values
+    if (isPipe && pipeData) {
+      const rpm = parseFloat(state.threadingRPM) || 400;
+      const feedIPM = rpm / tpi;
+      return {
+        pitch: pitch.toFixed(5),
+        threadDepth: ((majorDia - pipeData.minorDia) / 2).toFixed(4),
+        minorDia: pipeData.minorDia.toFixed(4),
+        pitchDia: pipeData.pitchDia.toFixed(4),
+        tapDrill: pipeData.tapDrillDecimal.toFixed(4),
+        tapDrillName: pipeData.tapDrill,
+        feedIPM: feedIPM.toFixed(3),
+        isPipe: true,
+        threadLength: pipeData.threadLength.toFixed(4),
+        taperPerInch: pipeData.taperPerInch.toFixed(4),
+        taperAngle: '1°47\'',
+        nominalOD: pipeData.nominalOD.toFixed(4)
+      };
+    }
 
     // Thread depth factors by type
     const threadDepthFactor = (state.threadType === 'un60' || state.threadType === 'iso60') ? 0.6495 :
@@ -111,7 +158,9 @@ export const ThreadCalc: React.FC = () => {
       minorDia: minorDia.toFixed(4),
       pitchDia: pitchDia.toFixed(4),
       tapDrill: tapDrillDecimal.toFixed(4),
-      feedIPM: feedIPM.toFixed(3)
+      tapDrillName: null,
+      feedIPM: feedIPM.toFixed(3),
+      isPipe: false
     };
   }, [threadParams, state.threadType, state.threadingRPM]);
 
@@ -226,32 +275,65 @@ export const ThreadCalc: React.FC = () => {
 
   // G76 code generation
   const g76Code = useMemo(() => {
-    const { majorDia, tpi, pitch } = threadParams;
+    const { majorDia, tpi, pitch, isPipe, pipeData } = threadParams;
     const threadDepth = parseFloat(basicResults.threadDepth);
     const minorDia = parseFloat(basicResults.minorDia);
     const rpm = parseInt(state.threadingRPM) || 400;
-    const length = parseFloat(state.threadLength) || 0.5;
+    const length = isPipe && pipeData ? pipeData.threadLength : (parseFloat(state.threadLength) || 0.5);
+
+    // Pipe thread taper: 0.0625"/inch (1:16), so per side it's 0.03125"/inch
+    const taperPerSide = isPipe ? 0.03125 : 0;
+
+    // Thread angle code: 29° for NPT/UN 60°, 27° for BSP/Whitworth 55°
+    const angleCode = (state.threadType === 'whitworth55') ? 27 : 29;
 
     // Haas format
     const haasK = (threadDepth * 10000).toFixed(0); // K in ten-thousandths
     const haasD = Math.round(threadDepth * 10000 * 0.3); // First pass ~30% of depth
-    const haasCode = `( THREAD: ${state.inputMode === 'standard' ? state.standardSize : `${majorDia}" - ${tpi} TPI`} )
+    const startDia = majorDia + 0.1;
+    const endMinorDia = isPipe ? (minorDia - taperPerSide * 2 * length) : minorDia;
+
+    let haasCode: string;
+    if (isPipe) {
+      // Tapered threading with G76
+      haasCode = `( PIPE THREAD: ${state.standardSize} - ${tpi} TPI )
+( TAPERED 1:16 = 0.0625"/inch diameter )
 G50 S${Math.round(rpm * 1.2)}
 G97 S${rpm} M03
-G00 X${(majorDia + 0.1).toFixed(3)} Z0.1
-G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} K${haasK} D${haasD} F${pitch.toFixed(5)} A29`;
+G00 X${startDia.toFixed(3)} Z0.1
+( G76: I = taper amount per side over length )
+G76 X${endMinorDia.toFixed(4)} Z-${length.toFixed(4)} I${(taperPerSide * length).toFixed(4)} K${haasK} D${haasD} F${pitch.toFixed(5)} A${angleCode}`;
+    } else {
+      haasCode = `( THREAD: ${state.inputMode === 'standard' ? state.standardSize : `${majorDia}" - ${tpi} TPI`} )
+G50 S${Math.round(rpm * 1.2)}
+G97 S${rpm} M03
+G00 X${startDia.toFixed(3)} Z0.1
+G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} K${haasK} D${haasD} F${pitch.toFixed(5)} A${angleCode}`;
+    }
 
     // Fanuc format
-    const fanucP = `${2}${1}${29}`.padStart(6, '0'); // 2 finish passes, 1 chamfer, 29° angle
-    const fanucCode = `( THREAD: ${state.inputMode === 'standard' ? state.standardSize : `${majorDia}" - ${tpi} TPI`} )
+    const fanucP = `${2}${1}${angleCode}`.padStart(6, '0'); // 2 finish passes, 1 chamfer, thread angle
+    let fanucCode: string;
+    if (isPipe) {
+      fanucCode = `( PIPE THREAD: ${state.standardSize} - ${tpi} TPI )
+( TAPERED 1:16 = 0.0625"/inch diameter )
 G50 S${Math.round(rpm * 1.2)}
 G97 S${rpm} M03
-G00 X${(majorDia + 0.1).toFixed(3)} Z0.1
+G00 X${startDia.toFixed(3)} Z0.1
+( R = taper amount per side )
+G76 P${fanucP} Q${Math.round(threadDepth * 10000 * 0.1)} R0.001
+G76 X${endMinorDia.toFixed(4)} Z-${length.toFixed(4)} R${(taperPerSide * length).toFixed(4)} P${Math.round(threadDepth * 10000)} Q${Math.round(threadDepth * 10000 * 0.3)} F${pitch.toFixed(5)}`;
+    } else {
+      fanucCode = `( THREAD: ${state.inputMode === 'standard' ? state.standardSize : `${majorDia}" - ${tpi} TPI`} )
+G50 S${Math.round(rpm * 1.2)}
+G97 S${rpm} M03
+G00 X${startDia.toFixed(3)} Z0.1
 G76 P${fanucP} Q${Math.round(threadDepth * 10000 * 0.1)} R0.001
 G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 10000)} Q${Math.round(threadDepth * 10000 * 0.3)} F${pitch.toFixed(5)}`;
+    }
 
     return { haas: haasCode, fanuc: fanucCode };
-  }, [threadParams, basicResults, state.threadingRPM, state.threadLength, state.inputMode, state.standardSize]);
+  }, [threadParams, basicResults, state.threadingRPM, state.threadLength, state.inputMode, state.standardSize, state.threadType]);
 
   return (
     <div className="thread-calc">
@@ -264,38 +346,47 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
           <label>Thread System</label>
           <PillToggle
             options={[
-              { value: 'imperial', label: 'Imperial' },
+              { value: 'imperial', label: 'UN' },
               { value: 'metric', label: 'Metric' },
-              { value: 'metricFine', label: 'Metric Fine' }
+              { value: 'metricFine', label: 'M Fine' },
+              { value: 'npt', label: 'NPT' },
+              { value: 'bspt', label: 'BSP' }
             ]}
             value={state.threadSystem}
             onChange={(v) => {
               const threads = getThreadsForSystem(v);
+              let threadType: ThreadType = 'un60';
+              if (v === 'metric' || v === 'metricFine') threadType = 'iso60';
+              else if (v === 'npt') threadType = 'un60'; // NPT uses 60°
+              else if (v === 'bspt') threadType = 'whitworth55'; // BSP uses 55°
               setState({
                 ...state,
                 threadSystem: v,
                 standardSize: threads[0]?.name || state.standardSize,
-                threadType: v === 'imperial' ? 'un60' : 'iso60'
+                threadType,
+                inputMode: isPipeSystem(v) ? 'standard' : state.inputMode // Pipe threads are standard only
               });
             }}
             size="small"
           />
         </div>
 
-        <div className="form-group">
-          <label>Input Mode</label>
-          <PillToggle
-            options={[
-              { value: 'standard', label: 'Standard Size' },
-              { value: 'custom', label: 'Custom' }
-            ]}
-            value={state.inputMode}
-            onChange={(v) => setState({ ...state, inputMode: v })}
-            fullWidth
-          />
-        </div>
+        {!isPipeSystem(state.threadSystem) && (
+          <div className="form-group">
+            <label>Input Mode</label>
+            <PillToggle
+              options={[
+                { value: 'standard', label: 'Standard Size' },
+                { value: 'custom', label: 'Custom' }
+              ]}
+              value={state.inputMode}
+              onChange={(v) => setState({ ...state, inputMode: v })}
+              fullWidth
+            />
+          </div>
+        )}
 
-        {state.inputMode === 'standard' ? (
+        {(state.inputMode === 'standard' || isPipeSystem(state.threadSystem)) ? (
           <div className="form-group">
             <label>Thread Size</label>
             <select
@@ -304,7 +395,7 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
             >
               {getThreadsForSystem(state.threadSystem).map((t) => (
                 <option key={t.name} value={t.name}>
-                  {t.name} {t.isMetric ? `(${(t.pitch * 25.4).toFixed(2)}mm pitch)` : `(${t.tpi} TPI)`}
+                  {t.name} {'isMetric' in t && t.isMetric ? `(${((1 / t.tpi) * 25.4).toFixed(2)}mm pitch)` : `(${t.tpi} TPI)`}
                 </option>
               ))}
             </select>
@@ -331,24 +422,32 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
           </div>
         )}
 
-        <div className="form-group">
-          <label>Thread Profile</label>
-          <PillToggle
-            options={state.threadSystem === 'imperial' ? [
-              { value: 'un60', label: 'UN 60°' },
-              { value: 'whitworth55', label: 'Whitworth 55°' },
-              { value: 'acme29', label: 'ACME 29°' }
-            ] : [
-              { value: 'iso60', label: 'ISO 60°' },
-              { value: 'whitworth55', label: 'Whitworth 55°' }
-            ]}
-            value={state.threadType}
-            onChange={(v) => setState({ ...state, threadType: v })}
-            size="small"
-          />
-        </div>
+        {!isPipeSystem(state.threadSystem) && (
+          <div className="form-group">
+            <label>Thread Profile</label>
+            <PillToggle
+              options={state.threadSystem === 'imperial' ? [
+                { value: 'un60', label: 'UN 60°' },
+                { value: 'whitworth55', label: 'Whitworth 55°' },
+                { value: 'acme29', label: 'ACME 29°' }
+              ] : [
+                { value: 'iso60', label: 'ISO 60°' },
+                { value: 'whitworth55', label: 'Whitworth 55°' }
+              ]}
+              value={state.threadType}
+              onChange={(v) => setState({ ...state, threadType: v })}
+              size="small"
+            />
+          </div>
+        )}
 
-        <div className="grid-2">
+        {isPipeSystem(state.threadSystem) && (
+          <NoteBox variant="info" title={state.threadSystem === 'npt' ? 'NPT - 60° Thread' : 'BSP - 55° Whitworth'}>
+            Tapered pipe thread: 1:16 taper (3/4" per foot)
+          </NoteBox>
+        )}
+
+        <div className={isPipeSystem(state.threadSystem) ? "" : "grid-2"}>
           <div className="form-group">
             <label>Threading RPM</label>
             <input
@@ -357,15 +456,17 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
               onChange={(e) => setState({ ...state, threadingRPM: e.target.value })}
             />
           </div>
-          <div className="form-group">
-            <label>Thread Length</label>
-            <input
-              type="number"
-              value={state.threadLength}
-              onChange={(e) => setState({ ...state, threadLength: e.target.value })}
-              step="0.125"
-            />
-          </div>
+          {!isPipeSystem(state.threadSystem) && (
+            <div className="form-group">
+              <label>Thread Length</label>
+              <input
+                type="number"
+                value={state.threadLength}
+                onChange={(e) => setState({ ...state, threadLength: e.target.value })}
+                step="0.125"
+              />
+            </div>
+          )}
         </div>
       </Card>
 
@@ -378,12 +479,34 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
         </div>
         <div className="results-grid-3" style={{ marginTop: '1rem' }}>
           <ResultItem label="Pitch Dia" value={basicResults.pitchDia} unit="in" variant="accent3" />
-          <ResultItem label="Tap Drill" value={basicResults.tapDrill} unit="in" variant="default" />
+          <ResultItem
+            label={basicResults.tapDrillName ? `Tap Drill (${basicResults.tapDrillName})` : "Tap Drill"}
+            value={basicResults.tapDrill}
+            unit="in"
+            variant="default"
+          />
           <ResultItem label="Feed IPM" value={basicResults.feedIPM} unit="IPM" variant="accent" />
         </div>
+
+        {/* Pipe thread specific data */}
+        {basicResults.isPipe && 'threadLength' in basicResults && (
+          <>
+            <div className="results-grid-3" style={{ marginTop: '1rem' }}>
+              <ResultItem label="Nominal OD" value={basicResults.nominalOD!} unit="in" variant="default" />
+              <ResultItem label="Thread Length" value={basicResults.threadLength!} unit="in" variant="accent2" />
+              <ResultItem label="Taper/Inch" value={basicResults.taperPerInch!} unit="in" variant="accent3" />
+            </div>
+            <div style={{ marginTop: '1rem' }}>
+              <NoteBox variant="tip">
+                Pipe threads are tapered at {basicResults.taperAngle} ({basicResults.taperPerInch}" per inch of thread length, or 0.75" per foot).
+              </NoteBox>
+            </div>
+          </>
+        )}
       </Card>
 
-      {/* Section B: Thread Class & Tolerance */}
+      {/* Section B: Thread Class & Tolerance (not for pipe threads) */}
+      {!isPipeSystem(state.threadSystem) && (
       <Card title="B: Thread Class & Tolerance" icon="📏">
         <div className="form-group">
           <label>Thread Type</label>
@@ -456,8 +579,10 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
           )}
         </div>
       </Card>
+      )}
 
-      {/* Section C: Thread Over Wires */}
+      {/* Section C: Thread Over Wires (not for pipe threads) */}
+      {!isPipeSystem(state.threadSystem) && (
       <Card title="C: Measure Over Wires (MOW)" icon="📐">
         <p className="wire-description">
           Three-wire measurement is the most accurate shop method for verifying thread pitch
@@ -540,9 +665,10 @@ G76 X${minorDia.toFixed(4)} Z-${length.toFixed(3)} P${Math.round(threadDepth * 1
           </div>
         )}
       </Card>
+      )}
 
       {/* Section D: G76 G-Code */}
-      <Card title="D: G76 Threading Code" icon="💻">
+      <Card title={isPipeSystem(state.threadSystem) ? "D: Pipe Threading Code" : "D: G76 Threading Code"} icon="💻">
         <CodeBlock title="Haas Format" code={g76Code.haas} />
         <div style={{ marginTop: '1rem' }}>
           <CodeBlock title="Fanuc Format" code={g76Code.fanuc} />

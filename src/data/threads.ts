@@ -129,3 +129,49 @@ export const wireConstants = {
   whitworth55: { bestWireFactor: 0.56369, mFormula: { wireCoeff: 3.1657, pitchCoeff: 0.9605 } },
   acme29: { bestWireFactor: 0.51635, mFormula: { wireCoeff: 4.9939, pitchCoeff: 1.9333 } }
 };
+
+// NPT (National Pipe Thread Tapered) - ANSI/ASME B1.20.1
+// 60° thread angle, 1:16 taper (0.75"/ft = 0.0625"/in per side)
+export interface PipeThread {
+  name: string;
+  tpi: number;
+  nominalOD: number;      // Nominal pipe OD at hand-tight engagement
+  pitchDia: number;       // Pitch diameter at hand-tight plane
+  majorDia: number;       // Major diameter at hand-tight plane
+  minorDia: number;       // Minor diameter
+  tapDrill: string;
+  tapDrillDecimal: number;
+  threadLength: number;   // Effective thread length (L2)
+  taperPerInch: number;   // Taper rate per inch (diameter change)
+  isPipe: true;
+}
+
+export const nptThreads: PipeThread[] = [
+  { name: '1/8 NPT', tpi: 27, nominalOD: 0.405, pitchDia: 0.37476, majorDia: 0.3896, minorDia: 0.3339, tapDrill: 'R', tapDrillDecimal: 0.339, threadLength: 0.2639, taperPerInch: 0.0625, isPipe: true },
+  { name: '1/4 NPT', tpi: 18, nominalOD: 0.540, pitchDia: 0.49163, majorDia: 0.5135, minorDia: 0.4329, tapDrill: '7/16', tapDrillDecimal: 0.4375, threadLength: 0.4018, taperPerInch: 0.0625, isPipe: true },
+  { name: '3/8 NPT', tpi: 18, nominalOD: 0.675, pitchDia: 0.62701, majorDia: 0.6485, minorDia: 0.5679, tapDrill: '37/64', tapDrillDecimal: 0.5781, threadLength: 0.4078, taperPerInch: 0.0625, isPipe: true },
+  { name: '1/2 NPT', tpi: 14, nominalOD: 0.840, pitchDia: 0.77843, majorDia: 0.8062, minorDia: 0.7013, tapDrill: '23/32', tapDrillDecimal: 0.7188, threadLength: 0.5337, taperPerInch: 0.0625, isPipe: true },
+  { name: '3/4 NPT', tpi: 14, nominalOD: 1.050, pitchDia: 0.98887, majorDia: 1.0168, minorDia: 0.9112, tapDrill: '59/64', tapDrillDecimal: 0.9219, threadLength: 0.5457, taperPerInch: 0.0625, isPipe: true },
+  { name: '1 NPT', tpi: 11.5, nominalOD: 1.315, pitchDia: 1.23863, majorDia: 1.2735, minorDia: 1.1401, tapDrill: '1-5/32', tapDrillDecimal: 1.1562, threadLength: 0.6828, taperPerInch: 0.0625, isPipe: true },
+  { name: '1-1/4 NPT', tpi: 11.5, nominalOD: 1.660, pitchDia: 1.58338, majorDia: 1.6180, minorDia: 1.4849, tapDrill: '1-1/2', tapDrillDecimal: 1.5000, threadLength: 0.7068, taperPerInch: 0.0625, isPipe: true },
+  { name: '1-1/2 NPT', tpi: 11.5, nominalOD: 1.900, pitchDia: 1.82234, majorDia: 1.8571, minorDia: 1.7237, tapDrill: '1-47/64', tapDrillDecimal: 1.7344, threadLength: 0.7235, taperPerInch: 0.0625, isPipe: true },
+  { name: '2 NPT', tpi: 11.5, nominalOD: 2.375, pitchDia: 2.29627, majorDia: 2.3310, minorDia: 2.1976, tapDrill: '2-7/32', tapDrillDecimal: 2.2188, threadLength: 0.7565, taperPerInch: 0.0625, isPipe: true },
+];
+
+// BSPT (British Standard Pipe Tapered) - ISO 7/1, BS 21
+// 55° Whitworth thread angle, 1:16 taper
+export const bsptThreads: PipeThread[] = [
+  { name: '1/8 BSPT', tpi: 28, nominalOD: 0.383, pitchDia: 0.3568, majorDia: 0.3710, minorDia: 0.3200, tapDrill: '8.5mm', tapDrillDecimal: 0.335, threadLength: 0.256, taperPerInch: 0.0625, isPipe: true },
+  { name: '1/4 BSPT', tpi: 19, nominalOD: 0.518, pitchDia: 0.4838, majorDia: 0.5040, minorDia: 0.4338, tapDrill: '11.5mm', tapDrillDecimal: 0.453, threadLength: 0.374, taperPerInch: 0.0625, isPipe: true },
+  { name: '3/8 BSPT', tpi: 19, nominalOD: 0.656, pitchDia: 0.6217, majorDia: 0.6418, minorDia: 0.5717, tapDrill: '15mm', tapDrillDecimal: 0.591, threadLength: 0.394, taperPerInch: 0.0625, isPipe: true },
+  { name: '1/2 BSPT', tpi: 14, nominalOD: 0.825, pitchDia: 0.7793, majorDia: 0.8062, minorDia: 0.7027, tapDrill: '18.5mm', tapDrillDecimal: 0.728, threadLength: 0.512, taperPerInch: 0.0625, isPipe: true },
+  { name: '3/4 BSPT', tpi: 14, nominalOD: 1.041, pitchDia: 0.9949, majorDia: 1.0218, minorDia: 0.9183, tapDrill: '24mm', tapDrillDecimal: 0.945, threadLength: 0.531, taperPerInch: 0.0625, isPipe: true },
+  { name: '1 BSPT', tpi: 11, nominalOD: 1.309, pitchDia: 1.2531, majorDia: 1.2878, minorDia: 1.1590, tapDrill: '30mm', tapDrillDecimal: 1.181, threadLength: 0.669, taperPerInch: 0.0625, isPipe: true },
+  { name: '1-1/4 BSPT', tpi: 11, nominalOD: 1.650, pitchDia: 1.5938, majorDia: 1.6286, minorDia: 1.4997, tapDrill: '39mm', tapDrillDecimal: 1.535, threadLength: 0.709, taperPerInch: 0.0625, isPipe: true },
+  { name: '1-1/2 BSPT', tpi: 11, nominalOD: 1.882, pitchDia: 1.8251, majorDia: 1.8599, minorDia: 1.7310, tapDrill: '45mm', tapDrillDecimal: 1.772, threadLength: 0.728, taperPerInch: 0.0625, isPipe: true },
+  { name: '2 BSPT', tpi: 11, nominalOD: 2.347, pitchDia: 2.2895, majorDia: 2.3242, minorDia: 2.1954, tapDrill: '57mm', tapDrillDecimal: 2.244, threadLength: 0.768, taperPerInch: 0.0625, isPipe: true },
+];
+
+export const getPipeThreadByName = (name: string): PipeThread | undefined => {
+  return [...nptThreads, ...bsptThreads].find(t => t.name === name);
+};
