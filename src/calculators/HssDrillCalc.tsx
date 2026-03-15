@@ -4,6 +4,7 @@ import { ResultItem } from '../components/ResultItem';
 import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useUnits } from '../hooks/useUnits';
 import {
   hssMaterials,
   getHssMaterial,
@@ -13,6 +14,9 @@ import {
   calculatePeckDepth
 } from '../data/hssDrills';
 import './HssDrillCalc.css';
+
+const MM_PER_INCH = 25.4;
+const M_PER_FOOT = 0.3048;
 
 interface HssDrillState {
   materialId: string;
@@ -28,6 +32,25 @@ const defaultState: HssDrillState = {
 
 export const HssDrillCalc: React.FC = () => {
   const [state, setState] = useLocalStorage<HssDrillState>('hss-drill-calc', defaultState);
+  const { units } = useUnits();
+  const isMetric = units === 'metric';
+  const lengthUnit = isMetric ? 'mm' : 'in';
+  const feedUnit = isMetric ? 'mm/min' : 'IPM';
+  const feedRevUnit = isMetric ? 'mm/rev' : 'IPR';
+  const speedUnit = isMetric ? 'm/min' : 'SFM';
+
+  // Convert display value to internal (inches)
+  const toInternal = (display: string) => {
+    const val = parseFloat(display);
+    return isMetric ? String(val / MM_PER_INCH) : display;
+  };
+
+  // Convert internal (inches) to display value
+  const toDisplay = (internal: string, decimals = 2) => {
+    const val = parseFloat(internal);
+    if (isNaN(val)) return internal;
+    return isMetric ? (val * MM_PER_INCH).toFixed(decimals) : internal;
+  };
 
   const { results, error, peckInfo } = useMemo(() => {
     const diameter = parseFloat(state.diameter);
@@ -116,25 +139,24 @@ export const HssDrillCalc: React.FC = () => {
 
         <div className="grid-2">
           <div className="form-group">
-            <label>Drill Diameter</label>
+            <label>Drill Diameter ({lengthUnit})</label>
             <input
               type="number"
-              value={state.diameter}
-              onChange={(e) => setState({ ...state, diameter: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.diameter)}
+              onChange={(e) => setState({ ...state, diameter: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "0.5" : "0.001"}
               min="0.001"
-              max="3"
             />
           </div>
           <div className="form-group">
-            <label>Hole Depth (optional)</label>
+            <label>Hole Depth ({lengthUnit})</label>
             <input
               type="number"
-              value={state.holeDepth}
-              onChange={(e) => setState({ ...state, holeDepth: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.holeDepth)}
+              onChange={(e) => setState({ ...state, holeDepth: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "1" : "0.001"}
               min="0"
             />
           </div>
@@ -167,21 +189,32 @@ export const HssDrillCalc: React.FC = () => {
 
             <div className="results-grid" style={{ marginTop: '1rem' }}>
               <ResultItem
-                label="Feed (IPR)"
-                value={`${results.iprMin} - ${results.iprMax}`}
+                label={`Feed (${feedRevUnit})`}
+                value={isMetric
+                  ? `${(parseFloat(results.iprMin) * MM_PER_INCH).toFixed(2)} - ${(parseFloat(results.iprMax) * MM_PER_INCH).toFixed(2)}`
+                  : `${results.iprMin} - ${results.iprMax}`
+                }
                 variant="default"
               />
               <ResultItem
-                label="Feed (IPM)"
-                value={`${results.ipmMin} - ${results.ipmMax}`}
-                unit="IPM"
+                label={`Feed (${feedUnit})`}
+                value={isMetric
+                  ? `${(parseFloat(results.ipmMin) * MM_PER_INCH).toFixed(0)} - ${(parseFloat(results.ipmMax) * MM_PER_INCH).toFixed(0)}`
+                  : `${results.ipmMin} - ${results.ipmMax}`
+                }
+                unit={feedUnit}
                 variant="accent3"
               />
             </div>
 
             <div className="sfm-reference" style={{ marginTop: '1rem' }}>
-              <span className="sfm-label">SFM Range:</span>
-              <span className="sfm-value">{results.sfmMin} - {results.sfmMax} SFM</span>
+              <span className="sfm-label">{speedUnit} Range:</span>
+              <span className="sfm-value">
+                {isMetric
+                  ? `${(results.sfmMin * M_PER_FOOT).toFixed(0)} - ${(results.sfmMax * M_PER_FOOT).toFixed(0)} m/min`
+                  : `${results.sfmMin} - ${results.sfmMax} SFM`
+                }
+              </span>
             </div>
           </Card>
 
@@ -197,8 +230,8 @@ export const HssDrillCalc: React.FC = () => {
                 {peckInfo.isPeckRequired && (
                   <ResultItem
                     label="Peck Depth"
-                    value={peckInfo.peckDepth.toFixed(3)}
-                    unit="in"
+                    value={isMetric ? (peckInfo.peckDepth * MM_PER_INCH).toFixed(1) : peckInfo.peckDepth.toFixed(3)}
+                    unit={lengthUnit}
                     variant="accent2"
                   />
                 )}

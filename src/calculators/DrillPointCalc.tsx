@@ -4,7 +4,10 @@ import { ResultItem } from '../components/ResultItem';
 import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useUnits } from '../hooks/useUnits';
 import './DrillPointCalc.css';
+
+const MM_PER_INCH = 25.4;
 
 interface DrillPointState {
   diameter: string;
@@ -29,6 +32,22 @@ const commonAngles = [
 
 export const DrillPointCalc: React.FC = () => {
   const [state, setState] = useLocalStorage<DrillPointState>('drill-point-calc', defaultState);
+  const { units } = useUnits();
+  const isMetric = units === 'metric';
+  const lengthUnit = isMetric ? 'mm' : 'in';
+
+  // Convert display value to internal (inches)
+  const toInternal = (display: string) => {
+    const val = parseFloat(display);
+    return isMetric ? String(val / MM_PER_INCH) : display;
+  };
+
+  // Convert internal (inches) to display value
+  const toDisplay = (internal: string, decimals = 3) => {
+    const val = parseFloat(internal);
+    if (isNaN(val)) return internal;
+    return isMetric ? (val * MM_PER_INCH).toFixed(decimals) : internal;
+  };
 
   // Validation and results
   const { results, error } = useMemo(() => {
@@ -93,13 +112,13 @@ export const DrillPointCalc: React.FC = () => {
 
         <div className="grid-3">
           <div className="form-group">
-            <label>Drill Diameter</label>
+            <label>Drill Diameter ({lengthUnit})</label>
             <input
               type="number"
-              value={state.diameter}
-              onChange={(e) => setState({ ...state, diameter: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.diameter, 2)}
+              onChange={(e) => setState({ ...state, diameter: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "0.5" : "0.001"}
               min="0"
             />
           </div>
@@ -116,13 +135,13 @@ export const DrillPointCalc: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label>Desired Depth</label>
+            <label>Desired Depth ({lengthUnit})</label>
             <input
               type="number"
-              value={state.desiredDepth}
-              onChange={(e) => setState({ ...state, desiredDepth: e.target.value })}
+              value={toDisplay(state.desiredDepth, 2)}
+              onChange={(e) => setState({ ...state, desiredDepth: toInternal(e.target.value) })}
               placeholder="Flat bottom"
-              step="0.001"
+              step={isMetric ? "0.5" : "0.001"}
               min="0"
             />
           </div>
@@ -144,8 +163,8 @@ export const DrillPointCalc: React.FC = () => {
           <div className="results-grid">
             <ResultItem
               label="Point Length"
-              value={results.pointLength}
-              unit="in"
+              value={isMetric ? (parseFloat(results.pointLength) * MM_PER_INCH).toFixed(2) : results.pointLength}
+              unit={lengthUnit}
               variant="accent"
             />
             <ResultItem
@@ -160,14 +179,14 @@ export const DrillPointCalc: React.FC = () => {
             <div className="results-grid" style={{ marginTop: '1rem' }}>
               <ResultItem
                 label="Total Drill Depth"
-                value={results.totalDepth}
-                unit="in"
+                value={isMetric ? (parseFloat(results.totalDepth) * MM_PER_INCH).toFixed(2) : results.totalDepth}
+                unit={lengthUnit}
                 variant="accent2"
               />
               <ResultItem
                 label="Point Volume"
-                value={results.pointVolume}
-                unit="in³"
+                value={isMetric ? (parseFloat(results.pointVolume) * 16387.064).toFixed(2) : results.pointVolume}
+                unit={isMetric ? "mm³" : "in³"}
                 variant="default"
               />
             </div>

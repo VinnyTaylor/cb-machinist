@@ -4,7 +4,10 @@ import { ResultItem } from '../components/ResultItem';
 import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useUnits } from '../hooks/useUnits';
 import './TaperCalc.css';
+
+const MM_PER_INCH = 25.4;
 
 interface TaperState {
   d1: string; // Large diameter
@@ -36,6 +39,22 @@ const taperReferences = [
 
 export const TaperCalc: React.FC = () => {
   const [state, setState] = useLocalStorage<TaperState>('taper-calc', defaultState);
+  const { units } = useUnits();
+  const isMetric = units === 'metric';
+  const lengthUnit = isMetric ? 'mm' : 'in';
+
+  // Convert display value to internal (inches)
+  const toInternal = (display: string) => {
+    const val = parseFloat(display);
+    return isMetric ? String(val / MM_PER_INCH) : display;
+  };
+
+  // Convert internal (inches) to display value
+  const toDisplay = (internal: string, decimals = 3) => {
+    const val = parseFloat(internal);
+    if (isNaN(val)) return internal;
+    return isMetric ? (val * MM_PER_INCH).toFixed(decimals) : internal;
+  };
 
   const handleReset = () => {
     setState(defaultState);
@@ -151,45 +170,45 @@ export const TaperCalc: React.FC = () => {
         </div>
         <div className="grid-2">
           <div className="form-group">
-            <label>D1 (Large Dia)</label>
+            <label>D1 Large ({lengthUnit})</label>
             <input
               type="number"
-              value={state.d1}
-              onChange={(e) => setState({ ...state, d1: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.d1, 2)}
+              onChange={(e) => setState({ ...state, d1: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "0.5" : "0.001"}
             />
           </div>
           <div className="form-group">
-            <label>D2 (Small Dia)</label>
+            <label>D2 Small ({lengthUnit})</label>
             <input
               type="number"
-              value={state.d2}
-              onChange={(e) => setState({ ...state, d2: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.d2, 2)}
+              onChange={(e) => setState({ ...state, d2: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "0.5" : "0.001"}
             />
           </div>
         </div>
 
         <div className="grid-3">
           <div className="form-group">
-            <label>Length</label>
+            <label>Length ({lengthUnit})</label>
             <input
               type="number"
-              value={state.length}
-              onChange={(e) => setState({ ...state, length: e.target.value })}
-              placeholder="Inches"
-              step="0.001"
+              value={toDisplay(state.length, 2)}
+              onChange={(e) => setState({ ...state, length: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "1" : "0.001"}
             />
           </div>
           <div className="form-group">
-            <label>Taper/Foot</label>
+            <label>{isMetric ? "Taper/300mm" : "Taper/Foot"}</label>
             <input
               type="number"
               value={state.tpf}
               onChange={(e) => setState({ ...state, tpf: e.target.value })}
-              placeholder="TPF"
+              placeholder={isMetric ? "TP300" : "TPF"}
               step="0.0001"
             />
           </div>
@@ -219,13 +238,36 @@ export const TaperCalc: React.FC = () => {
       {results && !error && (
         <Card title="Results" icon="📊">
           <div className="results-grid">
-            <ResultItem label="Large Dia (D1)" value={results.d1} unit="in" variant="accent" />
-            <ResultItem label="Small Dia (D2)" value={results.d2} unit="in" variant="accent2" />
-            <ResultItem label="Length" value={results.length} unit="in" variant="default" />
+            <ResultItem
+              label="Large Dia (D1)"
+              value={isMetric ? (parseFloat(results.d1) * MM_PER_INCH).toFixed(2) : results.d1}
+              unit={lengthUnit}
+              variant="accent"
+            />
+            <ResultItem
+              label="Small Dia (D2)"
+              value={isMetric ? (parseFloat(results.d2) * MM_PER_INCH).toFixed(2) : results.d2}
+              unit={lengthUnit}
+              variant="accent2"
+            />
+            <ResultItem
+              label="Length"
+              value={isMetric ? (parseFloat(results.length) * MM_PER_INCH).toFixed(2) : results.length}
+              unit={lengthUnit}
+              variant="default"
+            />
           </div>
           <div className="results-grid" style={{ marginTop: '1rem' }}>
-            <ResultItem label="Taper/Inch" value={results.tpi} variant="default" />
-            <ResultItem label="Taper/Foot" value={results.tpf} variant="accent3" />
+            <ResultItem
+              label={isMetric ? "Taper/mm" : "Taper/Inch"}
+              value={isMetric ? (parseFloat(results.tpi) / MM_PER_INCH).toFixed(6) : results.tpi}
+              variant="default"
+            />
+            <ResultItem
+              label={isMetric ? "Taper/300mm" : "Taper/Foot"}
+              value={isMetric ? (parseFloat(results.tpf) * (300 / (12 * MM_PER_INCH))).toFixed(4) : results.tpf}
+              variant="accent3"
+            />
           </div>
           <div className="results-grid" style={{ marginTop: '1rem' }}>
             <ResultItem label="Half Angle" value={results.halfAngle} unit="°" variant="accent" />

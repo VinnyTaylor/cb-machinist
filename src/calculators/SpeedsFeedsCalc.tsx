@@ -10,7 +10,12 @@ import { materials, getMaterialById } from '../data/materials';
 import { getToolingByMaterial } from '../data/tooling';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useFavorites } from '../hooks/useFavorites';
+import { useUnits } from '../hooks/useUnits';
 import './SpeedsFeedsCalc.css';
+
+// Conversion constants
+const MM_PER_INCH = 25.4;
+const M_PER_FOOT = 0.3048;
 
 type Operation = 'roughing' | 'finishing';
 type Mode = 'mill' | 'lathe';
@@ -53,12 +58,20 @@ const defaultLatheState: LatheState = {
 
 export const SpeedsFeedsCalc: React.FC = () => {
   const [mode, setMode] = useState<Mode>('mill');
+  const { units } = useUnits();
+  const isMetric = units === 'metric';
 
   const [millState, setMillState] = useLocalStorage<MillState>('speeds-mill', defaultMillState);
   const [latheState, setLatheState] = useLocalStorage<LatheState>('speeds-lathe', defaultLatheState);
 
   const millFavorites = useFavorites<MillState>('speeds-mill');
   const latheFavorites = useFavorites<LatheState>('speeds-lathe');
+
+  // Unit labels
+  const lengthUnit = isMetric ? 'mm' : 'in';
+  const speedUnit = isMetric ? 'm/min' : 'SFM';
+  const feedUnit = isMetric ? 'mm/min' : 'IPM';
+  const feedRevUnit = isMetric ? 'mm/rev' : 'IPR';
 
   const handleResetMill = () => {
     setMillState(defaultMillState);
@@ -217,7 +230,8 @@ export const SpeedsFeedsCalc: React.FC = () => {
               onDelete={(id) => millFavorites.removeFavorite(id)}
               formatPreview={(data) => {
                 const mat = getMaterialById(data.materialId);
-                return `${mat?.name || data.materialId} • ⌀${data.diameter}" • ${data.flutes}F`;
+                const dia = isMetric ? (parseFloat(data.diameter) * MM_PER_INCH).toFixed(1) : data.diameter;
+                return `${mat?.name || data.materialId} • ⌀${dia}${lengthUnit} • ${data.flutes}F`;
               }}
             />
 
@@ -250,22 +264,28 @@ export const SpeedsFeedsCalc: React.FC = () => {
 
             <div className="grid-2">
               <div className="form-group">
-                <label>SFM</label>
+                <label>{speedUnit}</label>
                 <input
                   type="number"
-                  value={millState.sfm}
-                  onChange={(e) => setMillState({ ...millState, sfm: e.target.value })}
-                  placeholder="Surface Feet/Min"
+                  value={isMetric ? (parseFloat(millState.sfm) * M_PER_FOOT).toFixed(0) : millState.sfm}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setMillState({ ...millState, sfm: isMetric ? String(val / M_PER_FOOT) : e.target.value });
+                  }}
+                  placeholder={isMetric ? "m/min" : "Surface Feet/Min"}
                 />
               </div>
               <div className="form-group">
-                <label>Cutter Diameter</label>
+                <label>Cutter Diameter ({lengthUnit})</label>
                 <input
                   type="number"
-                  value={millState.diameter}
-                  onChange={(e) => setMillState({ ...millState, diameter: e.target.value })}
-                  placeholder="Inches"
-                  step="0.0625"
+                  value={isMetric ? (parseFloat(millState.diameter) * MM_PER_INCH).toFixed(2) : millState.diameter}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setMillState({ ...millState, diameter: isMetric ? String(val / MM_PER_INCH) : e.target.value });
+                  }}
+                  placeholder={lengthUnit}
+                  step={isMetric ? "0.5" : "0.0625"}
                 />
               </div>
             </div>
@@ -283,13 +303,16 @@ export const SpeedsFeedsCalc: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Chip Load / Tooth</label>
+                <label>Chip Load ({lengthUnit})</label>
                 <input
                   type="number"
-                  value={millState.chipLoad}
-                  onChange={(e) => setMillState({ ...millState, chipLoad: e.target.value })}
-                  placeholder="Inches"
-                  step="0.0005"
+                  value={isMetric ? (parseFloat(millState.chipLoad) * MM_PER_INCH).toFixed(3) : millState.chipLoad}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setMillState({ ...millState, chipLoad: isMetric ? String(val / MM_PER_INCH) : e.target.value });
+                  }}
+                  placeholder={lengthUnit}
+                  step={isMetric ? "0.01" : "0.0005"}
                 />
               </div>
             </div>
@@ -306,17 +329,36 @@ export const SpeedsFeedsCalc: React.FC = () => {
             <Card title="Results" icon="📊">
               <div className="results-grid">
                 <ResultItem label="RPM" value={millResults.rpm} variant="accent" size="large" />
-                <ResultItem label="Feed Rate" value={millResults.feedIPM} unit="IPM" variant="accent2" size="large" />
+                <ResultItem
+                  label="Feed Rate"
+                  value={isMetric ? (parseFloat(millResults.feedIPM) * MM_PER_INCH).toFixed(0) : millResults.feedIPM}
+                  unit={feedUnit}
+                  variant="accent2"
+                  size="large"
+                />
               </div>
               <div className="results-grid" style={{ marginTop: '1rem' }}>
-                <ResultItem label="SFM Verify" value={millResults.sfmVerify} unit="SFM" variant="default" />
-                <ResultItem label="MRR Est." value={millResults.mrr} unit="in³/min" variant="accent3" />
+                <ResultItem
+                  label={isMetric ? "m/min Verify" : "SFM Verify"}
+                  value={isMetric ? (parseFloat(millResults.sfmVerify) * M_PER_FOOT).toFixed(0) : millResults.sfmVerify}
+                  unit={speedUnit}
+                  variant="default"
+                />
+                <ResultItem
+                  label="MRR Est."
+                  value={isMetric ? (parseFloat(millResults.mrr) * 16387.064).toFixed(0) : millResults.mrr}
+                  unit={isMetric ? "mm³/min" : "in³/min"}
+                  variant="accent3"
+                />
               </div>
 
               <div style={{ marginTop: '1rem' }}>
                 <CodeBlock
                   title="G-Code"
-                  code={`S${millResults.rpm} M03\nG01 F${millResults.feedIPM}`}
+                  code={isMetric
+                    ? `G21 (Metric)\nS${millResults.rpm} M03\nG01 F${(parseFloat(millResults.feedIPM) * MM_PER_INCH).toFixed(0)}`
+                    : `S${millResults.rpm} M03\nG01 F${millResults.feedIPM}`
+                  }
                 />
               </div>
             </Card>
@@ -383,7 +425,8 @@ export const SpeedsFeedsCalc: React.FC = () => {
               onDelete={(id) => latheFavorites.removeFavorite(id)}
               formatPreview={(data) => {
                 const mat = getMaterialById(data.materialId);
-                return `${mat?.name || data.materialId} • ⌀${data.partDiameter}"`;
+                const dia = isMetric ? (parseFloat(data.partDiameter) * MM_PER_INCH).toFixed(1) : data.partDiameter;
+                return `${mat?.name || data.materialId} • ⌀${dia}${lengthUnit}`;
               }}
             />
 
@@ -416,35 +459,44 @@ export const SpeedsFeedsCalc: React.FC = () => {
 
             <div className="grid-2">
               <div className="form-group">
-                <label>Part Diameter</label>
+                <label>Part Diameter ({lengthUnit})</label>
                 <input
                   type="number"
-                  value={latheState.partDiameter}
-                  onChange={(e) => setLatheState({ ...latheState, partDiameter: e.target.value })}
-                  placeholder="Inches"
-                  step="0.125"
+                  value={isMetric ? (parseFloat(latheState.partDiameter) * MM_PER_INCH).toFixed(1) : latheState.partDiameter}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setLatheState({ ...latheState, partDiameter: isMetric ? String(val / MM_PER_INCH) : e.target.value });
+                  }}
+                  placeholder={lengthUnit}
+                  step={isMetric ? "1" : "0.125"}
                 />
               </div>
               <div className="form-group">
-                <label>Target SFM</label>
+                <label>Target {speedUnit}</label>
                 <input
                   type="number"
-                  value={latheState.sfm}
-                  onChange={(e) => setLatheState({ ...latheState, sfm: e.target.value })}
-                  placeholder="Surface Feet/Min"
+                  value={isMetric ? (parseFloat(latheState.sfm) * M_PER_FOOT).toFixed(0) : latheState.sfm}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setLatheState({ ...latheState, sfm: isMetric ? String(val / M_PER_FOOT) : e.target.value });
+                  }}
+                  placeholder={isMetric ? "m/min" : "Surface Feet/Min"}
                 />
               </div>
             </div>
 
             <div className="grid-2">
               <div className="form-group">
-                <label>Feed (IPR)</label>
+                <label>Feed ({feedRevUnit})</label>
                 <input
                   type="number"
-                  value={latheState.feedIPR}
-                  onChange={(e) => setLatheState({ ...latheState, feedIPR: e.target.value })}
-                  placeholder="Inches/Rev"
-                  step="0.001"
+                  value={isMetric ? (parseFloat(latheState.feedIPR) * MM_PER_INCH).toFixed(2) : latheState.feedIPR}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setLatheState({ ...latheState, feedIPR: isMetric ? String(val / MM_PER_INCH) : e.target.value });
+                  }}
+                  placeholder={feedRevUnit}
+                  step={isMetric ? "0.05" : "0.001"}
                 />
               </div>
               <div className="form-group">
@@ -471,14 +523,26 @@ export const SpeedsFeedsCalc: React.FC = () => {
             <Card title="Results" icon="📊">
               <div className="results-grid">
                 <ResultItem label="RPM" value={latheResults.rpm} variant="accent" size="large" />
-                <ResultItem label="Feed Rate" value={latheResults.feedIPM} unit="IPM" variant="accent2" size="large" />
+                <ResultItem
+                  label="Feed Rate"
+                  value={isMetric ? (parseFloat(latheResults.feedIPM) * MM_PER_INCH).toFixed(0) : latheResults.feedIPM}
+                  unit={feedUnit}
+                  variant="accent2"
+                  size="large"
+                />
               </div>
               <div style={{ marginTop: '0.75rem' }}>
                 <ResultItem label="G50 (Max RPM)" value={`S${latheResults.g50}`} variant="default" />
               </div>
 
               <div style={{ marginTop: '1rem' }}>
-                <CodeBlock title="CSS G-Code" code={latheResults.cssCode} />
+                <CodeBlock
+                  title="CSS G-Code"
+                  code={isMetric
+                    ? `G21 (Metric)\nG50 S${latheResults.g50}\nG96 S${(parseFloat(latheState.sfm) * M_PER_FOOT).toFixed(0)} M03\nG01 F${(parseFloat(latheState.feedIPR) * MM_PER_INCH).toFixed(2)} G99`
+                    : latheResults.cssCode
+                  }
+                />
               </div>
             </Card>
           )}

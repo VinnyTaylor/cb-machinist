@@ -3,7 +3,10 @@ import { Card } from '../components/Card';
 import { ResetButton } from '../components/ResetButton';
 import { NoteBox } from '../components/NoteBox';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useUnits } from '../hooks/useUnits';
 import './BoltCircleCalc.css';
+
+const MM_PER_INCH = 25.4;
 
 interface BoltCircleState {
   bcd: string;
@@ -31,9 +34,25 @@ const defaultState: BoltCircleState = {
 export const BoltCircleCalc: React.FC = () => {
   const [state, setState] = useLocalStorage<BoltCircleState>('bolt-circle', defaultState);
   const [copied, setCopied] = useState(false);
+  const { units } = useUnits();
+  const isMetric = units === 'metric';
+  const lengthUnit = isMetric ? 'mm' : 'in';
 
   const handleReset = () => {
     setState(defaultState);
+  };
+
+  // Convert display value to internal (inches)
+  const toInternal = (display: string) => {
+    const val = parseFloat(display);
+    return isMetric ? String(val / MM_PER_INCH) : display;
+  };
+
+  // Convert internal (inches) to display value
+  const toDisplay = (internal: string, decimals = 3) => {
+    const val = parseFloat(internal);
+    if (isNaN(val)) return internal;
+    return isMetric ? (val * MM_PER_INCH).toFixed(decimals) : internal;
   };
 
   const { holes, error } = useMemo((): { holes: HolePosition[], error: string | null } => {
@@ -82,7 +101,11 @@ export const BoltCircleCalc: React.FC = () => {
 
   const handleCopyCoordinates = async () => {
     const coords = holes
-      .map((h) => `X${h.x.toFixed(4)} Y${h.y.toFixed(4)}`)
+      .map((h) => {
+        const x = isMetric ? (h.x * MM_PER_INCH).toFixed(3) : h.x.toFixed(4);
+        const y = isMetric ? (h.y * MM_PER_INCH).toFixed(3) : h.y.toFixed(4);
+        return `X${x} Y${y}`;
+      })
       .join('\n');
 
     try {
@@ -109,13 +132,13 @@ export const BoltCircleCalc: React.FC = () => {
         </div>
         <div className="grid-2">
           <div className="form-group">
-            <label>BCD Diameter</label>
+            <label>BCD Diameter ({lengthUnit})</label>
             <input
               type="number"
-              value={state.bcd}
-              onChange={(e) => setState({ ...state, bcd: e.target.value })}
-              placeholder="Inches"
-              step="0.125"
+              value={toDisplay(state.bcd, 2)}
+              onChange={(e) => setState({ ...state, bcd: toInternal(e.target.value) })}
+              placeholder={lengthUnit}
+              step={isMetric ? "1" : "0.125"}
             />
           </div>
           <div className="form-group">
@@ -143,23 +166,23 @@ export const BoltCircleCalc: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label>Center X</label>
+            <label>Center X ({lengthUnit})</label>
             <input
               type="number"
-              value={state.centerX}
-              onChange={(e) => setState({ ...state, centerX: e.target.value })}
+              value={toDisplay(state.centerX, 3)}
+              onChange={(e) => setState({ ...state, centerX: toInternal(e.target.value) })}
               placeholder="0"
-              step="0.001"
+              step={isMetric ? "0.1" : "0.001"}
             />
           </div>
           <div className="form-group">
-            <label>Center Y</label>
+            <label>Center Y ({lengthUnit})</label>
             <input
               type="number"
-              value={state.centerY}
-              onChange={(e) => setState({ ...state, centerY: e.target.value })}
+              value={toDisplay(state.centerY, 3)}
+              onChange={(e) => setState({ ...state, centerY: toInternal(e.target.value) })}
               placeholder="0"
-              step="0.001"
+              step={isMetric ? "0.1" : "0.001"}
             />
           </div>
         </div>
@@ -242,8 +265,8 @@ export const BoltCircleCalc: React.FC = () => {
                 <tr>
                   <th>#</th>
                   <th>Angle°</th>
-                  <th>X</th>
-                  <th>Y</th>
+                  <th>X ({lengthUnit})</th>
+                  <th>Y ({lengthUnit})</th>
                 </tr>
               </thead>
               <tbody>
@@ -251,8 +274,8 @@ export const BoltCircleCalc: React.FC = () => {
                   <tr key={hole.number}>
                     <td className="hole-num">{hole.number}</td>
                     <td>{hole.angle.toFixed(2)}°</td>
-                    <td className="coord">{hole.x.toFixed(4)}</td>
-                    <td className="coord">{hole.y.toFixed(4)}</td>
+                    <td className="coord">{isMetric ? (hole.x * MM_PER_INCH).toFixed(3) : hole.x.toFixed(4)}</td>
+                    <td className="coord">{isMetric ? (hole.y * MM_PER_INCH).toFixed(3) : hole.y.toFixed(4)}</td>
                   </tr>
                 ))}
               </tbody>
